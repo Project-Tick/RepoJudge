@@ -1,19 +1,29 @@
 :root {
-    --bg-dark: #0a0a0f;
-    --bg-sidebar: #111118;
-    --bg-card: rgba(255, 255, 255, 0.03);
-    --border-color: rgba(255, 255, 255, 0.06);
-    --primary: #6366f1;
-    --secondary: #a855f7;
-    --accent: #ec4899;
-    --success: #22c55e;
-    --warning: #eab308;
-    --danger: #ef4444;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --font-main: 'Inter', sans-serif;
+    --bg-dark: #030305;
+    --bg-sidebar: rgba(10, 10, 15, 0.7);
+    --bg-card: rgba(255, 255, 255, 0.02);
+    --bg-card-hover: rgba(255, 255, 255, 0.04);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+
+    --primary: #818cf8;
+    --secondary: #c084fc;
+    --accent: #f472b6;
+
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-code: 'JetBrains Mono', monospace;
+
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.06);
+    --card-radius: 16px;
 }
 
 * {
@@ -41,6 +51,8 @@ body {
 .sidebar {
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -530,15 +542,23 @@ body {
 }
 
 .metric-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: var(--glass-border);
+    border-radius: var(--card-radius);
+    padding: 24px;
     display: flex;
     align-items: center;
     gap: 15px;
     position: relative;
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-color: var(--border-hover);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
 .metric-card::before {
