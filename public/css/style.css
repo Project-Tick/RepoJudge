@@ -67,24 +67,26 @@ body {
 
 .new-analysis-btn {
     margin: 15px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    border: none;
-    border-radius: 10px;
-    color: white;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
     font-family: var(--font-main);
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: 500;
+    font-size: 0.9rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: filter 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .new-analysis-btn:hover {
-    filter: brightness(1.15);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-muted);
+    transform: translateY(-1px);
 }
 
 .history-section {
