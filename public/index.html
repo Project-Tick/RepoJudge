@@ -183,43 +183,24 @@
             color: var(--text-primary);
         }
 
-        .cta-btn {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            border-radius: 8px;
+        .nav-cta-btn {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
+            transition: all 0.2s;
         }
 
-        .cta-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            opacity: 0;
-            z-index: -1;
-            transition: opacity 0.3s ease;
-        }
-
-        .cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-        }
-
-        .cta-btn:hover::before {
-            opacity: 1;
+        .nav-cta-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--text-muted);
+            transform: translateY(-1px);
         }
 
         /* Scroll Animations */
@@ -575,7 +556,9 @@
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
             <a href="https://github.com" target="_blank">GitHub</a>
-            <a href="dashboard.html" class="cta-btn">Launch App</a>
+            <a href="dashboard.html" class="nav-cta-btn">
+                Launch App
+            </a>
         </div>
     </nav>
 
@@ -688,10 +671,6 @@
     <section class="cta-section reveal">
         <h2>Find Issues Before Production</h2>
         <p>Analyze any GitHub repository in seconds. Free, no sign-up required.</p>
-        <a href="dashboard.html" class="btn-primary">
-            <i class='bx bx-rocket'></i>
-            Launch Dashboard
-        </a>
     </section>
 
     <!-- Stats Section -->
