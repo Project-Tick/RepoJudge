@@ -16,13 +16,14 @@
 - **🔐 Private Repo Support** - Login with GitHub to analyze your private repositories
 
 ## 🖼️ Screenshots
-| Landing Page | Dashboard |
-|--------------|-----------|
-| ![Landing](./screenshots/landing.png) | ![Dashboard](./Screenshot/dashboard.png) |
-## Screenshots
-<img src="./Screenshot/landing.png" width="600">
-<img src="./Screenshot/dashboard.png" width="600">
-## 🚀 Quick Start
+
+Below are some screenshots showcasing the main user interface of RepoJudge.
+
+### Landing Page
+<img src="./screenshots/landing.png" alt="RepoJudge Landing Page" width="800">
+
+### Dashboard
+<img src="./screenshots/dashboard.png" alt="RepoJudge Dashboard" width="800">
 
 ### Prerequisites
 - Node.js 18+
