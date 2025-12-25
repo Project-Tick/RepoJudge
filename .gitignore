@@ -2,3 +2,11 @@ node_modules/
 .env
 .DS_Store
 *.log
+
+# Internal docs & notes
+SCORING.md
+PROJECT_SUMMARY.md
+eleştiri.md
+ideas.md
+task.md
+list_models.js
