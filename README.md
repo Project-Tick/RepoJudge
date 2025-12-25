@@ -16,10 +16,9 @@
 - **🔐 Private Repo Support** - Login with GitHub to analyze your private repositories
 
 ## 🖼️ Screenshots
-
 | Landing Page | Dashboard |
 |--------------|-----------|
-| Modern landing with login options | Full analysis dashboard with tabs |
+| ![Landing](./screenshots/landing.png) | ![Dashboard](./screenshots/dashboard.png) |
 
 ## 🚀 Quick Start
 
