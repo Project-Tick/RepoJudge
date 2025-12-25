@@ -150,20 +150,55 @@ async function loadUserRepos() {
             return;
         }
 
-        reposList.innerHTML = data.repos.map(repo => `
-            <div class="repo-item" data-url="https://github.com/${repo.full_name}">
+        reposList.innerHTML = data.repos.map((repo, i) => `
+            <div class="repo-item" data-url="https://github.com/${repo.full_name}" data-index="${i}">
                 <i class='bx ${repo.private ? 'bx-lock-alt' : 'bx-git-repo-forked'}'></i>
                 <span>${repo.name}</span>
                 ${repo.private ? '<span class="private-badge">Private</span>' : ''}
+                <i class='bx bx-dots-vertical-rounded repo-menu-trigger' data-index="${i}"></i>
+                <div class="menu-dropdown repo-menu" data-index="${i}">
+                    <div class="menu-item" data-action="analyze"><i class='bx bx-analyse'></i> Analiz Et</div>
+                    <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
+                </div>
             </div>
         `).join('');
 
-        // Add click handlers
-        reposList.querySelectorAll('.repo-item').forEach(item => {
-            item.addEventListener('click', () => {
-                repoUrlInput.value = item.dataset.url;
-                startAnalysis();
+        // Menu trigger click
+        reposList.querySelectorAll('.repo-menu-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = trigger.dataset.index;
+                const dropdown = reposList.querySelector(`.repo-menu[data-index="${index}"]`);
+
+                // Close all other dropdowns
+                reposList.querySelectorAll('.repo-menu').forEach(d => d.classList.remove('active'));
+                dropdown.classList.toggle('active');
             });
+        });
+
+        // Menu item actions
+        reposList.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = item.closest('.repo-menu');
+                const repoItem = item.closest('.repo-item');
+                const action = item.dataset.action;
+                const url = repoItem.dataset.url;
+
+                dropdown.classList.remove('active');
+
+                if (action === 'analyze') {
+                    repoUrlInput.value = url;
+                    startAnalysis();
+                } else if (action === 'github') {
+                    window.open(url, '_blank');
+                }
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            reposList.querySelectorAll('.repo-menu').forEach(d => d.classList.remove('active'));
         });
     } catch (err) {
         console.error('Failed to load repos:', err);
@@ -255,6 +290,7 @@ function setupEventListeners() {
 
     setupChat();
     setupBadge();
+    setupScoringInfo();
 }
 
 // Chat Logic
@@ -359,6 +395,25 @@ function setupBadge() {
         const icon = copyBtn.querySelector('i');
         icon.className = 'bx bx-check';
         setTimeout(() => icon.className = 'bx bx-copy', 2000);
+    });
+}
+
+// Scoring Info Modal
+function setupScoringInfo() {
+    const btn = document.getElementById('scoringInfoBtn');
+    const modal = document.getElementById('scoringModal');
+    const closeBtn = modal?.querySelector('.close-modal');
+
+    btn?.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+    });
+
+    closeBtn?.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
     });
 }
 

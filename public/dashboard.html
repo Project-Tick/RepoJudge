@@ -11,10 +11,40 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=9">
+
+    <!-- Critical CSS - prevents flash of unstyled content -->
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #e4e4e7;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
 </head>
 
-<body class="dashboard-page">
+<body class="dashboard-page" style="background: #0a0a0f;">
     <div class="bg-grid"></div>
     <div class="bg-glow-container">
         <div class="glow-blob glow-1"></div>
@@ -138,6 +168,9 @@
                                     <span class="metric-value" id="healthScore">--</span>
                                     <span class="metric-label" data-i18n="healthScore">Health Score</span>
                                 </div>
+                                <button class="info-btn" id="scoringInfoBtn" title="Nasıl puanlanıyor?">
+                                    <i class='bx bx-help-circle'></i>
+                                </button>
                             </div>
                             <div class="metric-card issues-count">
                                 <div class="metric-icon"><i class='bx bx-error-circle'></i></div>
@@ -279,6 +312,41 @@
                     <code id="badgeCode"></code>
                     <button class="copy-code-btn"><i class='bx bx-copy'></i></button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoring Info Modal -->
+    <div id="scoringModal" class="modal hidden">
+        <div class="modal-content scoring-info-modal">
+            <button class="close-modal">&times;</button>
+            <h2><i class='bx bx-info-circle'></i> Nasıl Puanlıyoruz?</h2>
+
+            <div class="scoring-section">
+                <h3>🎯 Puanlama Sistemi</h3>
+                <p>Her proje <strong>95 puan</strong> ile başlar. Sadece gerçek sorunlar için puan düşürülür:</p>
+                <ul>
+                    <li><span class="deduct">-20</span> Güvenlik açıkları (SQLi, XSS, vb.)</li>
+                    <li><span class="deduct">-15</span> Çökme riski / mantık hataları</li>
+                    <li><span class="deduct">-10</span> Kullanılmayan / ölü kod</li>
+                    <li><span class="deduct">-10</span> Spaghetti kod yapısı</li>
+                </ul>
+            </div>
+
+            <div class="scoring-section">
+                <h3>📊 Puan Aralıkları</h3>
+                <div class="score-ranges">
+                    <div class="range elite"><span>95-100</span> Elite - Mükemmel</div>
+                    <div class="range pro"><span>80-94</span> Profesyonel - Üretime hazır</div>
+                    <div class="range avg"><span>60-79</span> Ortalama - Geliştirilebilir</div>
+                    <div class="range poor"><span>0-59</span> Kritik - Acil müdahale gerekli</div>
+                </div>
+            </div>
+
+            <div class="scoring-section">
+                <h3>💡 Öneriler</h3>
+                <p>Öneriler, projenizde eksik olan best practice'lere göre otomatik oluşturulur: Test yoksa test
+                    önerilir, CI/CD yoksa pipeline önerilir, vs.</p>
             </div>
         </div>
     </div>
