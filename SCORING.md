@@ -1,39 +1,55 @@
-# 🏆 RepoJudge Scoring System
+# RepoJudge Puanlama Sistemi
 
-RepoJudge uses an **AI-powered analysis engine** (Google Gemini 2.0) to evaluate codebases. Unlike traditional linters that only count syntax errors, RepoJudge understands the **context, purpose, and quality** of your code.
+RepoJudge projeleri adil ama gerçekçi bir yaklaşımla değerlendirir.
+Amaç geliştiriciyi gömmek değil, gerçek riskleri ortaya çıkarmaktır.
 
-## 🎯 How Scores Are Calculated
+Varsayılan yaklaşımımız:
+**"Çalışan kod > Mükemmel görünen kod"**
 
-We start with a **perfect score of 100** and deduct points based on identified issues. We do **not** penalize for stylistic choices or missing "nice-to-have" features if the core project works well.
+Bu yüzden sistem, projelerin çalıştığını varsayarak 100 puandan başlar ve yalnızca gerçek sorunlar için puan düşürür.
 
-### 📊 Score Ranges
+---
 
-| Score | Rating | Description |
-|-------|--------|-------------|
-| **90-100** | 💎 **Elite** | Production-ready, secure, and well-architected. Examples: Popular libraries like React, Spicetify, Axios. |
-| **75-89** | 🚀 **Solid** | Good quality code. May have minor technical debt or missing documentation, but safe to use. |
-| **50-74** | ⚠️ **Average** | Functional but messy. Needs refactoring, better security practices, or tests. |
-| **0-49** | 🚨 **Critical** | Broken, dangerous, or fundamentally flawed architecture. Avoid using in production. |
+## Varsayılan Mod: Balanced Mode (Önerilen)
 
-### 🔻 Penalty System (Deductions)
+Balanced Mode, gerçek dünya yazılım geliştirme koşullarına göre tasarlanmıştır.
+*   **Stil tercihleri yüzünden puan kırılmaz**
+*   **Hobi projelerinde %100 test yok diye ceza verilmez**
+*   **"Şöyle yazılsa daha şık olurdu" tarzı yorumlar skoru etkilemez**
 
-| Issue Type | Deduction | Description |
-|------------|-----------|-------------|
-| **Critical Security** | **-20 pts** | Hardcoded API keys, SQL injection, XSS vulnerabilities. |
-| **Major Bugs** | **-15 pts** | Crashes, broken core features, race conditions. |
-| **Architecture** | **-10 pts** | Spaghetti code, massive files (God Class), no separation of concerns. |
-| **Documentation** | **-10 pts** | Zero README or instructions (only if the project is complex). |
+Bu mod şu soruya cevap verir:
+**"Bu proje çalışıyor mu ve güvenli mi?"**
 
-### 🎁 Bonuses & Mercy Rule
+### Puan Aralıkları
+*   **90–100:** Sağlam, güvenli, amacı net
+*   **75–89:** Üretime yakın, küçük teknik borçlar var
+*   **50–74:** Çalışıyor ama düzenleme şart
+*   **0–49:** Riskli, eksik veya bozuk
 
-- **Context Matters:** A hackathon project isn't judged as harshly as a banking app.
-- **Functionality > Perfection:** If a project solves a complex problem elegantly, we overlook minor issues.
-- **"It Works" Bonus:** Popular, widely used tools get the benefit of the doubt.
+---
 
-## ⚖️ Fairness Policy
+## Puan Düşürme Mantığı (Deduction Model)
 
-We believe that **working code is good code**. We do not deduct points for:
-- Not having 100% test coverage (unless it's a critical library).
-- Indentation styles (Tabs vs Spaces).
-- Missing comments on obvious code.
-- Using older but stable technologies.
+RepoJudge puan kırarken insaflıdır ama kör değildir.
+*   **Kritik güvenlik açığı:** -20
+*   **Çökme riski veya ciddi mantık hatası:** -15
+*   **Aşırı düzensiz yapı / spaghetti kod:** -10 ila -20
+*   **Hiç dokümantasyon olmaması:** -10
+
+> Aynı tip hatalar sınırsız şekilde cezalandırılmaz. Bir sorunu on kez yapmak, on kat daha kötü sayılmaz.
+
+---
+
+## Alternatif Analiz Modları
+
+İsteyen kullanıcılar için analiz sertliği değiştirilebilir.
+
+### Audit Mode (Kurumsal Denetçi)
+
+Bu mod "çalışıyor" demekle yetinmez.
+*   **Best practice yoksa puan kırar**
+*   **Konfigürasyon eksikse ceza verir**
+*   **Logging, test, yapılandırma eksikliği dikkate alınır**
+
+Bu mod şu soruya cevap verir:
+**"Bu proje üretime gerçekten hazır mı?"**

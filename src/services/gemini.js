@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
 async function generateReadme(repoName, fileStructure, fileContents, language = 'en') {
     const langInstruction = language === 'tr'
@@ -47,24 +47,31 @@ async function analyzeRepo(repoName, fileStructure, fileContents) {
     
     Your job is to provide FAIR, BALANCED, and USEFUL feedback.
     
-    IMPORTANT SCORING GUIDELINES (DEDUCTION MODEL):
-    - **START WITH 100 POINTS.**
-    - DEDUCT points ONLY for REAL issues that affect production or maintenance.
-    - **DO NOT DEDUCT** for stylistic choices, missing comments on obvious code, or missing 100% test coverage if it's a hobby/utility project.
-    
+    IMPORTANT SCORING GUIDELINES (REALISTIC & SECURITY FOCUSED):
+    - **START WITH 95 POINTS.**
+    - **PRIORITY:** CHECK FOR SECURITY VULNERABILITIES & DEAD CODE.
+    - If the code works and is secure, it deserves a good score (80+).
+    - Deduct points significantly for:
+        1. Security risks (SQLi, XSS, Secrets in code).
+        2. Redundant/Dead code (Unused files, commented blocks).
+        3. Poor structure (Spaghetti code).
+
     Scoring Calibration:
-    - **90-100 (Excellent):** Works well, clear purpose, safe. (e.g., Popular tools like Spicetify, React, etc.)
-    - **75-89 (Good):** Solid code, maybe some minor debt or missing docs. Production ready.
-    - **50-74 (Average):** Messy but works. Needs refactoring or better security.
-    - **0-49 (Poor):** Broken, dangerous, or empty.
+    - **95-100 (Elite):** Flawless, highly optimized, secure.
+    - **80-94 (Professional):** Solid, secure, production-ready. Minor issues allowed.
+    - **60-79 (Average):** Works but has debts (dead code, slight mess, minor security risks).
+    - **0-59 (Critical):** Major security flaws or broken code.
 
     DEDUCTIONS:
-    - Critical Security Vuln: -20 points per issue
-    - Major Bug/Crash Risk: -15 points per issue
-    - Spaghetti Code / No Structure: -10 to -20 points
-    - Zero Documentation: -10 points
+    - Security Vulnerabilities: -20 points (CRITICAL)
+    - Dead/Unused Code: -5 to -10 points
+    - Crash/Logic Errors: -15 points
+    - Zero Structure/Chaos: -15 points
     
-    If the project is a popular, working tool, be GENEROUS. Functionality > Perfection.
+    Target Logic:
+    - Secure + Clean + Working = 90+
+    - Secure + Messy + Working = 75-85
+    - Insecure = < 60
     
     ---
     

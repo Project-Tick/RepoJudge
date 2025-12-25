@@ -289,11 +289,11 @@ body {
 .repos-section {
     padding: 15px;
     border-top: 1px solid var(--border-color);
-    flex: 1;
-    /* Allow it to grow/shrink if needed, but history-section has flex:1 too. We might want to adjust */
+    /* Removed flex: 1 to prevent fighting with history-section */
+    flex-shrink: 0;
     overflow-y: auto;
-    max-height: 200px;
-    /* Limit height so it doesn't push footer off */
+    max-height: 250px;
+    /* Slightly increased max-height */
 }
 
 .repos-section.hidden {
@@ -324,6 +324,16 @@ body {
     font-size: 0.85rem;
     color: var(--text-secondary);
     transition: background 0.15s;
+    overflow: hidden;
+    /* Ensure no spill */
+}
+
+.repo-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    /* Allow text to take available space */
 }
 
 .repo-item:hover {
@@ -1306,6 +1316,7 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
