@@ -19,7 +19,9 @@
 | Landing Page | Dashboard |
 |--------------|-----------|
 | ![Landing](./screenshots/landing.png) | ![Dashboard](./Screenshot/dashboard.png) |
-
+## Screenshots
+<img src="./screenshots/landing.png" width="600">
+<img src="./screenshots/dashboard.png" width="600">
 ## 🚀 Quick Start
 
 ### Prerequisites
