@@ -18,7 +18,7 @@
 ## 🖼️ Screenshots
 | Landing Page | Dashboard |
 |--------------|-----------|
-| ![Landing](./screenshots/landing.png) | ![Dashboard](./screenshots/dashboard.png) |
+| ![Landing](./screenshots/landing.png) | ![Dashboard](./Screenshot/dashboard.png) |
 
 ## 🚀 Quick Start
 
