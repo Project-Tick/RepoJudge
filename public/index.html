@@ -547,6 +547,9 @@
         <div class="glow-blob glow-4"></div>
     </div>
 
+    <!-- Floating Particles -->
+    <div class="particles-container" id="particles"></div>
+
     <nav>
         <a href="/" class="logo">
             <i class='bx bx-code-block'></i>
@@ -563,32 +566,298 @@
     </nav>
 
     <section class="hero">
-        <div class="badge">
-            <i class='bx bx-bug'></i>
-            AI-Powered Static Code Analysis
-        </div>
-        <h1>
-            Find Bugs Before<br>
-            <span class="gradient">Your Users Do</span>
-        </h1>
-        <p>
-            Get instant code reviews from an AI senior engineer. Find bugs, security issues,
-            architectural problems, and get a professional README — all in seconds.
-        </p>
-        <div class="hero-buttons">
-            <a href="/auth/github" class="btn-primary github-btn">
-                <i class='bx bxl-github'></i>
-                Login with GitHub
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                Now with Auto-Fix & README Gen
+            </div>
+
+            <!-- Dynamic Headline Rotator -->
+            <div class="headline-rotator">
+                <h1 class="hero-title active">Find Bugs Before <br> <span class="gradient-text">Your Users Do</span>
+                </h1>
+                <h1 class="hero-title">Generate READMEs <br> <span class="gradient-text"
+                        style="background: linear-gradient(to right, #ec4899, #8b5cf6); -webkit-background-clip: text; background-clip: text;">In
+                        Seconds</span></h1>
+                <h1 class="hero-title">Secure Your Code <br> <span class="gradient-text"
+                        style="background: linear-gradient(to right, #3b82f6, #10b981); -webkit-background-clip: text; background-clip: text;">Automatically</span>
+                </h1>
+            </div>
+
+            <p class="hero-subtitle">
+                The AI-powered code review assistant that analyzes your repo, finds critical issues, and writes your
+                documentation for you.
+            </p>
+
+            <div class="cta-group">
+                <a href="/auth/github" class="btn btn-primary" style="position: relative; z-index: 10;">
+                    <i class='bx bxl-github'></i> Analyze My Repo
+                </a>
+                <a href="#how-it-works" class="btn btn-secondary">
+                    <i class='bx bx-play-circle'></i> See How It Works
+                </a>
+            </div>
+
+            <div class="login-hint">
+                <i class='bx bx-check'></i> Free for public repositories
+            </div>
+
+            <a href="dashboard.html?demo=facebook/react" class="demo-link">
+                <i class='bx bx-play-circle'></i> See a live demo with facebook/react →
             </a>
-            <a href="dashboard.html" class="btn-secondary">
-                <i class='bx bx-user'></i>
-                Continue as Guest
-            </a>
+
+            <!-- Product Preview with Connection Points -->
+            <div class="hero-image-container reveal">
+                <!-- Circuit Lines connecting Headline to Image -->
+                <div class="connection-circuit-lines">
+                    <div class="circuit-v"></div>
+                    <div class="circuit-h"></div>
+                    <div class="circuit-dot"></div>
+                </div>
+
+                <div class="browser-frame">
+                    <div class="browser-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <!-- Slider Tabs (Visual only) -->
+                        <div class="browser-tabs">
+                            <div class="tab active">Dashboard</div>
+                            <div class="tab">README.md</div>
+                        </div>
+                    </div>
+
+                    <div class="hero-slider">
+                        <!-- Slide 1: Dashboard -->
+                        <div class="hero-slide active">
+                            <img src="analysis_detail_preview.png" alt="RepoJudge Dashboard">
+                            <div class="slide-caption">
+                                <i class='bx bx-pulse'></i> Deep Code Analysis
+                            </div>
+                        </div>
+
+                        <!-- Slide 2: README Image -->
+                        <div class="hero-slide">
+                            <img src="readme_preview.png" alt="README Generation"
+                                style="object-fit: cover; object-position: top;">
+                            <div class="slide-caption" style="background: rgba(236, 72, 153, 0.9);">
+                                <i class='bx bx-magic-wand'></i> AI Auto-Documentation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-glow"></div>
+            </div>
+    </section>
+
+    <!-- Pain Points Section - "The Problem" -->
+    <section class="pain-section" style="padding: 80px 20px; text-align: center; position: relative; z-index: 1;">
+        <p
+            style="color: var(--accent); font-weight: 600; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; font-size: 0.9rem;">
+            Why Developers Suffer</p>
+        <h2
+            style="font-size: 2.5rem; font-weight: 700; margin-bottom: 60px; max-width: 800px; margin-left: auto; margin-right: auto;">
+            Great code. Terrible documentation.
+        </h2>
+
+        <div class="pain-grid reveal">
+            <!-- Pain 1: Docs are hard -->
+            <div class="pain-card">
+                <div class="pain-icon"><i class='bx bx-file-blank'></i></div>
+                <h3>"I have no idea how to write a README"</h3>
+                <p>You built an amazing tool, but your repo looks empty. You don't know Markdown or what to include.</p>
+                <div class="pain-tag">Invisible Work</div>
+            </div>
+
+            <!-- Pain 2: Spaghetti Code -->
+            <div class="pain-card">
+                <div class="pain-icon"><i class='bx bx-brain'></i></div>
+                <h3>"Is my code actually good?"</h3>
+                <p>It works on your machine, but does it follow best practices? Is it secure? You have nobody to ask.
+                </p>
+                <div class="pain-tag">Uncertainty</div>
+            </div>
+
+            <!-- Pain 3: Prompt Engineering -->
+            <div class="pain-card">
+                <div class="pain-icon"><i class='bx bx-message-alt-error'></i></div>
+                <h3>"AI Prompts are confusing"</h3>
+                <p>You tried asking ChatGPT, but explaining your entire codebase context took longer than coding it.</p>
+                <div class="pain-tag">Friction</div>
+            </div>
         </div>
-        <p class="login-hint">
-            <i class='bx bx-lock-alt'></i>
-            Login to analyze private repositories
-        </p>
+
+        <!-- Section Connector -->
+        <div class="section-connector">
+            <div class="connector-line"></div>
+            <div class="connector-dot"></div>
+            <div class="connector-line" style="height: 30px;"></div>
+        </div>
+    </section>
+
+    <!-- Product Deep Dive Showcase -->
+    <section class="showcase-section" style="padding: 100px 20px; position: relative; z-index: 1;">
+
+        <!-- FIRST: README Before/After (Most Impactful) -->
+        <div class="readme-transformation reveal">
+            <div class="section-header" style="text-align: center; margin-bottom: 50px;">
+                <div class="badge"
+                    style="background: rgba(236, 72, 153, 0.1); color: var(--accent); border-color: rgba(236, 72, 153, 0.3); margin: 0 auto 20px;">
+                    <i class='bx bx-magic-wand'></i> README Transformation
+                </div>
+                <h2 style="font-size: 2.5rem;">Professional Docs. <br><span
+                        style="background: linear-gradient(90deg, #ec4899, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent;">No
+                        Prompt Engineering Required.</span></h2>
+                <p
+                    style="color: var(--text-secondary); max-width: 650px; margin: 20px auto 0; font-size: 1.1rem; line-height: 1.6;">
+                    You don't need to explain your code to AI. We analyze your entire repository structure, detect
+                    dependencies, and writing style to generate a perfect README.md instantly.</p>
+            </div>
+
+            <div class="before-after-container">
+                <!-- BEFORE -->
+                <div class="comparison-card before">
+                    <div class="comparison-label">
+                        <i class='bx bx-x-circle'></i> Before
+                    </div>
+                    <div class="readme-mock">
+                        <h1 style="font-size: 1.2rem; margin-bottom: 10px;">my-project</h1>
+                        <p style="color: var(--text-muted); font-style: italic;">No description provided.</p>
+                        <div
+                            style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 8px; text-align: center;">
+                            <i class='bx bx-file' style="font-size: 3rem; color: var(--text-muted); opacity: 0.5;"></i>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Empty README.md
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arrow -->
+                <div class="transform-arrow">
+                    <i class='bx bx-right-arrow-alt'></i>
+                    <span>AI Magic</span>
+                </div>
+
+                <!-- AFTER -->
+                <div class="comparison-card after">
+                    <div class="comparison-label">
+                        <i class='bx bx-check-circle'></i> After
+                    </div>
+                    <div class="readme-mock styled">
+                        <div class="readme-badges" style="margin-bottom: 15px;">
+                            <img src="https://img.shields.io/badge/RepoJudge-94-blue?style=flat-square" alt="badge"
+                                style="height: 20px;">
+                            <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="license"
+                                style="height: 20px; margin-left: 5px;">
+                        </div>
+                        <h1 style="font-size: 1.3rem; margin-bottom: 8px;">🚀 My Awesome Project</h1>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">A powerful tool
+                            that helps developers automate their workflow.</p>
+
+                        <div style="margin-top: 20px;">
+                            <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 8px;">📦 Installation
+                            </h3>
+                            <code
+                                style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; display: block;">npm install my-project</code>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 8px;">✨ Features</h3>
+                            <ul
+                                style="color: var(--text-secondary); font-size: 0.85rem; padding-left: 20px; line-height: 1.8;">
+                                <li>Fast and lightweight</li>
+                                <li>TypeScript support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Section Connector (Blue for Analysis) -->
+        <div class="section-connector" style="margin: 80px auto;">
+            <div class="connector-line blue"></div>
+            <div class="connector-dot blue"></div>
+            <div class="connector-line blue" style="height: 30px;"></div>
+        </div>
+
+        <!-- SECOND: Comprehensive Analysis (with Screenshot) -->
+        <div class="showcase-row reveal">
+            <div class="showcase-text">
+                <div class="badge"
+                    style="margin-bottom: 20px; background: rgba(34, 197, 94, 0.1); color: var(--success); border-color: rgba(34, 197, 94, 0.3);">
+                    <i class='bx bx-pulse'></i> Deep Analysis
+                </div>
+                <h2>Know Your Code's Health</h2>
+                <p>Don't guess where the problems are. Get a comprehensive breakdown of your project's health, including
+                    security risks, performance bottlenecks, and architectural flaws. All prioritized by severity.</p>
+                <ul class="feature-list" style="list-style: none; margin-top: 20px;">
+                    <li
+                        style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                        <i class='bx bx-check-circle' style="color: var(--primary);"></i> Instant Health Score
+                    </li>
+                    <li
+                        style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                        <i class='bx bx-check-circle' style="color: var(--primary);"></i> Critical Issue Detection
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                        <i class='bx bx-check-circle' style="color: var(--primary);"></i> Actionable Recommendations
+                    </li>
+                </ul>
+            </div>
+            <div class="showcase-image right">
+                <div class="browser-frame small">
+                    <img src="analysis_detail_preview.png" alt="Analysis Detail" style="width: 100%; display: block;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison-section" style="padding: 80px 20px; position: relative; z-index: 1;">
+        <div class="section-header reveal">
+            <h2>Why RepoJudge?</h2>
+            <p>Stop wasting experienced engineers' time on basic reviews</p>
+        </div>
+
+        <div class="comparison-table reveal">
+            <div class="comparison-header">
+                <div>Feature</div>
+                <div class="competitor">Traditional Tools <span class="sub-text">(SonarQube, ESLint)</span></div>
+                <div class="us">RepoJudge <span class="badge-mini">AI Power</span></div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="feature-name"><i class='bx bx-time-five'></i> Setup Time</div>
+                <div class="competitor-val">Hours (Config, CI/CD)</div>
+                <div class="us-val"><i class='bx bxs-zap'></i> 10 Seconds (Paste URL)</div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="feature-name"><i class='bx bx-brain'></i> Analysis Depth</div>
+                <div class="competitor-val">Syntax & Style Rules</div>
+                <div class="us-val"><i class='bx bxs-check-circle'></i> Semantic & Logical Logic</div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="feature-name"><i class='bx bx-wrench'></i> Solving Issues</div>
+                <div class="competitor-val">Just highlights errors</div>
+                <div class="us-val"><i class='bx bxs-magic-wand'></i> Auto-Fix Suggestions</div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="feature-name"><i class='bx bx-book-content'></i> Documentation</div>
+                <div class="competitor-val">Manual Writing</div>
+                <div class="us-val"><i class='bx bxs-file-doc'></i> Auto-Generated README</div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="feature-name"><i class='bx bx-dollar'></i> Cost</div>
+                <div class="competitor-val">Expensive Enterprise Plans</div>
+                <div class="us-val"><i class='bx bxs-gift'></i> 100% Free for Public Repos</div>
+            </div>
+        </div>
     </section>
 
     <section class="features" id="features">
@@ -635,6 +904,58 @@
         </div>
     </section>
 
+    <!-- Testimonials Section -->
+    <section class="testimonials-section" style="padding: 100px 20px; position: relative; z-index: 1;">
+        <div class="section-header reveal">
+            <h2>Developers Love It</h2>
+            <p>Join thousands of developers shipping cleaner code</p>
+        </div>
+
+        <div class="testimonials-grid reveal">
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <p>"Finally, a tool that doesn't require me to set up a whole CI/CD pipeline just to get a code
+                        review. Paste URL, get results. That's it."</p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar" style="background: linear-gradient(135deg, #6366f1, #a855f7);">S</div>
+                    <div class="author-info">
+                        <span class="author-name">Sarah K.</span>
+                        <span class="author-role">Senior Dev @ Startup</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <p>"The auto-generated README alone saved me 2 hours. Plus it found a SQL injection vulnerability I
+                        completely missed. Worth every second."</p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar" style="background: linear-gradient(135deg, #22c55e, #3b82f6);">M</div>
+                    <div class="author-info">
+                        <span class="author-name">Mehmet Y.</span>
+                        <span class="author-role">Indie Hacker</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <p>"We use it before every major release. It's like having an extra pair of eyes from a senior
+                        engineer who never gets tired."</p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar" style="background: linear-gradient(135deg, #ec4899, #f59e0b);">J</div>
+                    <div class="author-info">
+                        <span class="author-name">James T.</span>
+                        <span class="author-role">Tech Lead @ Agency</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="how-it-works" id="how-it-works">
         <div class="section-header reveal">
             <h2>How It Works</h2>
@@ -671,33 +992,144 @@
     <section class="cta-section reveal">
         <h2>Find Issues Before Production</h2>
         <p>Analyze any GitHub repository in seconds. Free, no sign-up required.</p>
+        <a href="dashboard.html" class="btn-primary"
+            style="display: inline-flex; margin-top: 30px; font-size: 1.2rem; padding: 18px 40px;">
+            <i class='bx bx-rocket'></i> Start Analysis Now
+        </a>
     </section>
 
     <!-- Stats Section -->
-    <section class="stats-section reveal"
-        style="padding: 60px 20px; text-align: center; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.01);">
-        <div
-            style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
-            <div>
-                <h3 style="font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 5px;">10k+</h3>
-                <p style="color: var(--text-secondary);">Repos Analyzed</p>
+    <!-- Tech Stack / Credibility Section -->
+    <section class="tech-stack reveal"
+        style="padding: 40px 20px; text-align: center; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.3);">
+        <p
+            style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px;">
+            Powered by Enterprise-Grade Tech</p>
+        <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; opacity: 0.7;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class='bx bxl-google' style="font-size: 1.5rem; color: #fff;"></i>
+                <span style="font-weight: 600; color: #fff;">Gemini 1.5 Pro</span>
             </div>
-            <div>
-                <h3 style="font-size: 2.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 5px;">5M+</h3>
-                <p style="color: var(--text-secondary);">Lines of Code Reviewed</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class='bx bxl-github' style="font-size: 1.5rem; color: #fff;"></i>
+                <span style="font-weight: 600; color: #fff;">GitHub API</span>
             </div>
-            <div>
-                <h3 style="font-size: 2.5rem; font-weight: 700; color: var(--accent); margin-bottom: 5px;">99%</h3>
-                <p style="color: var(--text-secondary);">Detection Rate</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class='bx bxl-nodejs' style="font-size: 1.5rem; color: #22c55e;"></i>
+                <span style="font-weight: 600; color: #fff;">Node.js High Performance</span>
             </div>
         </div>
     </section>
 
-    <footer>
-        <p>
-            Built with <i class='bx bx-heart' style="color: var(--accent);"></i> by RepoJudge &nbsp;•&nbsp;
-            <a href="https://github.com" target="_blank">GitHub</a>
-        </p>
+    <!-- FAQ Section -->
+    <section class="faq-section" style="padding: 100px 20px; position: relative; z-index: 1;">
+        <div class="section-header reveal">
+            <h2>Frequently Asked Questions</h2>
+            <p>Got questions? We've got answers</p>
+        </div>
+
+        <div class="faq-container reveal">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is my code safe? Do you store it?</span>
+                    <i class='bx bx-chevron-down'></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Absolutely. We don't store your code. We fetch it directly from GitHub, send it to Google's
+                        Gemini AI for analysis, and return the results. Nothing is saved on our servers. Your code stays
+                        on GitHub.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Can I analyze private repositories?</span>
+                    <i class='bx bx-chevron-down'></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! Login with your GitHub account and grant us read access. We use OAuth with minimal
+                        permissions (read-only). You can revoke access anytime from your GitHub settings.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>What languages are supported?</span>
+                    <i class='bx bx-chevron-down'></i>
+                </div>
+                <div class="faq-answer">
+                    <p>RepoJudge supports all major programming languages: JavaScript, TypeScript, Python, Java, Go,
+                        Rust, C++, Ruby, PHP, and more. The AI understands context regardless of the language.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is it really free?</span>
+                    <i class='bx bx-chevron-down'></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, for public repositories it's 100% free with no limits. For private repositories, you get a
+                        generous free tier. We may introduce premium features in the future, but the core analysis will
+                        always be free.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How accurate is the AI analysis?</span>
+                    <i class='bx bx-chevron-down'></i>
+                </div>
+                <div class="faq-answer">
+                    <p>We use Google's Gemini 1.5 Pro, one of the most advanced AI models. It understands code context,
+                        not just syntax. While no tool is perfect, our users report catching real bugs they would have
+                        missed in manual reviews.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced Footer -->
+    <footer class="enhanced-footer">
+        <div class="footer-content">
+            <!-- Newsletter -->
+            <div class="footer-newsletter">
+                <h3>Stay Updated</h3>
+                <p>Get notified about new features and updates. No spam, ever.</p>
+                <form class="newsletter-form"
+                    onsubmit="event.preventDefault(); this.querySelector('button').textContent = 'Subscribed! ✓'; this.querySelector('input').disabled = true;">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit"><i class='bx bx-send'></i></button>
+                </form>
+            </div>
+
+            <!-- Links -->
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#how-it-works">How It Works</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-logo">
+                <i class='bx bx-code-block'></i> RepoJudge
+            </div>
+            <p>© 2025 RepoJudge. Built with <i class='bx bx-heart' style="color: var(--accent);"></i> for developers.
+            </p>
+            <div class="footer-social">
+                <a href="https://github.com/grxtor/RepoJudge" target="_blank" title="GitHub"><i
+                        class='bx bxl-github'></i></a>
+            </div>
+        </div>
     </footer>
 
     <script>
@@ -736,7 +1168,2049 @@
                 card.style.background = 'rgba(255, 255, 255, 0.02)';
             });
         });
+
+        // ===== PREMIUM EFFECTS =====
+
+        // 1. Cursor Glow Follow
+        const cursorGlow = document.getElementById('cursorGlow');
+        document.addEventListener('mousemove', (e) => {
+            cursorGlow.style.left = e.clientX + 'px';
+            cursorGlow.style.top = e.clientY + 'px';
+        });
+
+        // 2. Generate Floating Particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // 3. Card Glow Effect (Mouse Position)
+        document.querySelectorAll('.feature-card, .pain-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--mouse-x', x + '%');
+                card.style.setProperty('--mouse-y', y + '%');
+            });
+        });
+
+        // 4. Smooth Scroll for Nav Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // 5. Navbar Background on Scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(0, 0, 0, 0.8)';
+                nav.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+            } else {
+                nav.style.background = 'rgba(0, 0, 0, 0.5)';
+                nav.style.borderBottom = '1px solid var(--border-color)';
+            }
+        });
     </script>
 </body>
 
 </html>
+<style>
+    /* Hero Image Styles - Temporarily injecting here to avoid full CSS reload issues */
+    .hero-image-container {
+        margin-top: 60px;
+        position: relative;
+        width: 100%;
+        max-width: 1000px;
+        animation: fadeInUp 0.8s ease-out 0.5s both;
+    }
+
+    .browser-frame {
+        background: rgba(20, 20, 25, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+        transform: perspective(1000px) rotateX(2deg);
+        transition: transform 0.5s ease;
+    }
+
+    .hero-image-container:hover .browser-frame {
+        transform: perspective(1000px) rotateX(0deg) scale(1.01);
+    }
+
+    .browser-header {
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        gap: 8px;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .dot.red {
+        background: #ff5f56;
+    }
+
+    .dot.yellow {
+        background: #ffbd2e;
+    }
+
+    .dot.green {
+        background: #27c93f;
+    }
+
+    .hero-dashboard-img {
+        width: 100%;
+        display: block;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .hero-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120%;
+        height: 120%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+        filter: blur(60px);
+        z-index: 1;
+    }
+</style>
+<style>
+    /* Adjust browser frame for a more realistic desktop look */
+    .browser-frame {
+        /* Existing: background: rgba(20, 20, 25, 0.9); */
+        background: #0a0a0f;
+        /* Match dashboard bg */
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Reduce border opacity */
+        box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.8),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+        /* Deep shadow + inner border */
+    }
+
+    /* Ensure the image fills the frame perfectly without radius issues */
+    .hero-dashboard-img {
+        width: 100%;
+        margin-bottom: -4px;
+        /* Fix tiny gap at bottom */
+        mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        /* Fade out bottom slightly */
+        -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        opacity: 0.9;
+        /* Slight blend */
+    }
+</style>
+<style>
+    /* Showcase Section Styles */
+    .showcase-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 60px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .showcase-text {
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .showcase-text h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .showcase-text p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+
+    .showcase-image {
+        flex: 1;
+        position: relative;
+    }
+
+    .showcase-image .browser-frame.small {
+        transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+        box-shadow: -30px 30px 80px rgba(0, 0, 0, 0.5);
+        transition: transform 0.5s ease;
+    }
+
+    .showcase-image:hover .browser-frame.small {
+        transform: perspective(1000px) rotateY(0) rotateX(0) scale(1.02);
+    }
+
+    .showcase-image.left .browser-frame.small {
+        transform: perspective(1000px) rotateY(5deg) rotateX(2deg);
+    }
+
+    @media (max-width: 1024px) {
+        .showcase-row {
+            flex-direction: column;
+            gap: 40px;
+            text-align: center;
+        }
+
+        .showcase-row:nth-child(even) {
+            flex-direction: column-reverse;
+        }
+
+        .showcase-text {
+            max-width: 100%;
+        }
+
+        .feature-list {
+            display: inline-block;
+            text-align: left;
+        }
+    }
+</style>
+<style>
+    /* Comparison Table Styles */
+    .comparison-table {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .comparison-header {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr;
+        padding: 20px 30px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--border-color);
+        font-weight: 700;
+    }
+
+    .comparison-header .us {
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .badge-mini {
+        background: rgba(99, 102, 241, 0.2);
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .sub-text {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 400;
+        margin-top: 4px;
+    }
+
+    .comparison-row {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr;
+        padding: 20px 30px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.2s;
+    }
+
+    .comparison-row:last-child {
+        border-bottom: none;
+    }
+
+    .comparison-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .feature-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-secondary);
+    }
+
+    .feature-name i {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+    }
+
+    .competitor-val {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .us-val {
+        color: var(--text-primary);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .us-val i {
+        color: var(--success);
+    }
+
+    @media (max-width: 768px) {
+
+        .comparison-header,
+        .comparison-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .feature-name {
+            justify-content: center;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .us-val {
+            justify-content: center;
+        }
+    }
+</style>
+<style>
+    /* Pain Points Styles */
+    .pain-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .pain-card {
+        background: rgba(255, 25, 25, 0.03);
+        /* Slight red tint */
+        border: 1px solid rgba(255, 100, 100, 0.1);
+        padding: 30px;
+        border-radius: 16px;
+        position: relative;
+        transition: transform 0.3s;
+    }
+
+    .pain-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 25, 25, 0.06);
+        border-color: rgba(255, 100, 100, 0.2);
+    }
+
+    .pain-icon i {
+        font-size: 2.5rem;
+        color: var(--text-muted);
+        /* Dull color for pain */
+        margin-bottom: 15px;
+    }
+
+    .pain-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .pain-card p {
+        color: var(--text-secondary);
+        font-style: italic;
+        /* Quote style */
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .pain-tag {
+        display: inline-block;
+        padding: 4px 10px;
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger, #ef4444);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .pain-arrow {
+        margin-top: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: var(--success);
+        opacity: 0.8;
+        animation: bounce 2s infinite;
+    }
+
+    .pain-arrow i {
+        font-size: 2rem;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-10px);
+        }
+
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+</style>
+<style>
+    /* ===== PREMIUM HERO ENHANCEMENTS ===== */
+
+    /* Typewriter Effect */
+    .typewriter {
+        position: relative;
+        display: inline-block;
+    }
+
+    .typewriter::after {
+        content: '|';
+        position: absolute;
+        right: -10px;
+        color: var(--primary);
+        animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+
+        0%,
+        50% {
+            opacity: 1;
+        }
+
+        51%,
+        100% {
+            opacity: 0;
+        }
+    }
+
+    /* Rotating Words - Alternative phrases */
+    .rotating-words {
+        display: inline-block;
+        position: relative;
+        text-align: left;
+    }
+
+    /* Floating Particles */
+    .particles-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: var(--primary);
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: float-up 15s infinite linear;
+    }
+
+    @keyframes float-up {
+        0% {
+            transform: translateY(100vh) scale(0);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 0.3;
+        }
+
+        90% {
+            opacity: 0.3;
+        }
+
+        100% {
+            transform: translateY(-10vh) scale(1);
+            opacity: 0;
+        }
+    }
+
+    /* Mouse Follow Glow */
+    .cursor-glow {
+        position: fixed;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 1;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.3s;
+        filter: blur(30px);
+    }
+
+    /* Premium Card Glow on Hover */
+    .feature-card,
+    .pain-card,
+    .step {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before,
+    .pain-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .feature-card:hover::before,
+    .pain-card:hover::before {
+        opacity: 1;
+    }
+
+    /* Smooth Scroll Reveal - Enhanced */
+    .reveal {
+        opacity: 0;
+        transform: translateY(60px);
+        transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Staggered Children Animation */
+    .reveal-stagger>* {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-stagger.active>*:nth-child(1) {
+        transition-delay: 0.1s;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .reveal-stagger.active>*:nth-child(2) {
+        transition-delay: 0.2s;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .reveal-stagger.active>*:nth-child(3) {
+        transition-delay: 0.3s;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .reveal-stagger.active>*:nth-child(4) {
+        transition-delay: 0.4s;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .reveal-stagger.active>*:nth-child(5) {
+        transition-delay: 0.5s;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .reveal-stagger.active>*:nth-child(6) {
+        transition-delay: 0.6s;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Gradient Border Animation */
+    @keyframes gradient-border {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .btn-primary {
+        position: relative;
+        background-size: 200% 200%;
+        animation: gradient-border 3s ease infinite;
+    }
+
+    /* Number Counter Animation */
+    .counter {
+        display: inline-block;
+    }
+
+    /* Premium Badge Pulse */
+    .badge {
+        animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+        }
+    }
+</style>
+<style>
+    /* Testimonials Styles */
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .testimonial-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 30px;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .testimonial-card::before {
+        content: '"';
+        position: absolute;
+        top: 20px;
+        left: 25px;
+        font-size: 4rem;
+        color: var(--primary);
+        opacity: 0.2;
+        font-family: Georgia, serif;
+        line-height: 1;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(99, 102, 241, 0.3);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .testimonial-content p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.7;
+        font-style: italic;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .author-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .author-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .author-role {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+</style>
+<style>
+    /* FAQ Styles */
+    .faq-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .faq-item {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.02);
+        transition: all 0.3s;
+    }
+
+    .faq-item:hover {
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .faq-item.active {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .faq-question {
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-primary);
+        transition: color 0.2s;
+    }
+
+    .faq-question:hover {
+        color: var(--primary);
+    }
+
+    .faq-question i {
+        font-size: 1.5rem;
+        transition: transform 0.3s;
+        color: var(--text-muted);
+    }
+
+    .faq-item.active .faq-question i {
+        transform: rotate(180deg);
+        color: var(--primary);
+    }
+
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+        max-height: 300px;
+        padding: 0 25px 25px;
+    }
+
+    .faq-answer p {
+        color: var(--text-secondary);
+        line-height: 1.7;
+    }
+</style>
+
+<script>
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', () => {
+            const item = question.parentElement;
+            const isActive = item.classList.contains('active');
+
+            // Close all
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+
+            // Open clicked if wasn't active
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        });
+    });
+</script>
+<style>
+    /* Enhanced Footer Styles */
+    .enhanced-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 60px 20px 30px;
+        position: relative;
+        z-index: 1;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .footer-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 40px;
+        margin-bottom: 50px;
+    }
+
+    .footer-newsletter {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .footer-newsletter h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .footer-newsletter p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+
+    .newsletter-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .newsletter-form input {
+        flex: 1;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: inherit;
+    }
+
+    .newsletter-form input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .newsletter-form input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .newsletter-form button {
+        padding: 12px 18px;
+        background: var(--primary);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .newsletter-form button:hover {
+        background: var(--secondary);
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 60px;
+        flex-wrap: wrap;
+    }
+
+    .footer-col h4 {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .footer-col a {
+        display: block;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+        color: var(--text-primary);
+    }
+
+    .footer-bottom {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-top: 30px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .footer-logo i {
+        color: var(--primary);
+        font-size: 1.3rem;
+    }
+
+    .footer-bottom p {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .footer-social {
+        display: flex;
+        gap: 15px;
+    }
+
+    .footer-social a {
+        color: var(--text-muted);
+        font-size: 1.3rem;
+        transition: color 0.2s;
+    }
+
+    .footer-social a:hover {
+        color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+        .footer-content {
+            flex-direction: column;
+        }
+
+        .footer-links {
+            gap: 30px;
+        }
+
+        .footer-bottom {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+<style>
+    /* Demo Link */
+    .demo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 15px;
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+
+    .demo-link:hover {
+        color: var(--secondary);
+        gap: 12px;
+    }
+
+    .demo-link i {
+        font-size: 1.2rem;
+    }
+</style>
+<style>
+    /* Showcase Image Hover Effect */
+    .showcase-image .browser-frame.small {
+        transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+        box-shadow: -30px 30px 80px rgba(0, 0, 0, 0.5);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .showcase-image:hover .browser-frame.small {
+        transform: perspective(1000px) rotateY(0) rotateX(0) scale(1.05);
+        box-shadow: 0 40px 100px rgba(99, 102, 241, 0.2);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .showcase-image.left .browser-frame.small {
+        transform: perspective(1000px) rotateY(5deg) rotateX(2deg);
+        box-shadow: 30px 30px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .showcase-image.left:hover .browser-frame.small {
+        transform: perspective(1000px) rotateY(0) rotateX(0) scale(1.05);
+        box-shadow: 0 40px 100px rgba(236, 72, 153, 0.2);
+        border-color: rgba(236, 72, 153, 0.3);
+    }
+
+    /* Remove cursor glow style */
+    .cursor-glow {
+        display: none !important;
+    }
+</style>
+
+<script>
+    // Scroll Parallax for Glow Blobs
+    const glowBlobs = document.querySelectorAll('.glow-blob');
+
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+
+        glowBlobs.forEach((blob, index) => {
+            const speed = 0.05 + (index * 0.02); // Different speed for each blob
+            const direction = index % 2 === 0 ? 1 : -1; // Alternate directions
+
+            blob.style.transform = `translateY(${scrollY * speed * direction}px)`;
+        });
+    });
+
+    // Remove cursor glow JS (override)
+    const cursorGlowOld = document.getElementById('cursorGlow');
+    if (cursorGlowOld) cursorGlowOld.remove();
+</script>
+<script>
+    // Enhanced Scroll Parallax - Stronger Movement
+    const glowBlobsEnhanced = document.querySelectorAll('.glow-blob');
+
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+
+        glowBlobsEnhanced.forEach((blob, index) => {
+            const speed = 0.15 + (index * 0.08); // Much stronger parallax
+            const direction = index % 2 === 0 ? 1 : -1;
+            const horizontalSpeed = 0.05 + (index * 0.03); // Also move horizontally
+
+            blob.style.transform = `translate(${scrollY * horizontalSpeed * direction}px, ${scrollY * speed * direction}px) scale(${1 + scrollY * 0.0002})`;
+        });
+    });
+</script>
+
+<style>
+    /* Faster base animation for glows */
+    .glow-blob {
+        transition: transform 0.1s linear;
+    }
+
+    @keyframes move {
+        0% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+        }
+
+        25% {
+            transform: translate(100px, 80px) rotate(90deg) scale(1.15);
+        }
+
+        50% {
+            transform: translate(-80px, 120px) rotate(180deg) scale(0.95);
+        }
+
+        75% {
+            transform: translate(60px, -60px) rotate(270deg) scale(1.1);
+        }
+
+        100% {
+            transform: translate(0, 0) rotate(360deg) scale(1);
+        }
+    }
+
+    .glow-1 {
+        animation-duration: 12s !important;
+    }
+
+    .glow-2 {
+        animation-duration: 15s !important;
+    }
+
+    .glow-3 {
+        animation-duration: 10s !important;
+    }
+
+    .glow-4 {
+        animation-duration: 18s !important;
+    }
+</style>
+<style>
+    /* Before/After README Comparison */
+    .before-after-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+        flex-wrap: wrap;
+    }
+
+    .comparison-card {
+        flex: 1;
+        min-width: 320px;
+        max-width: 450px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .comparison-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .comparison-card.before {
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .comparison-card.before:hover {
+        box-shadow: 0 20px 60px rgba(239, 68, 68, 0.1);
+    }
+
+    .comparison-card.after {
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .comparison-card.after:hover {
+        box-shadow: 0 20px 60px rgba(34, 197, 94, 0.1);
+    }
+
+    .comparison-label {
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .comparison-card.before .comparison-label {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .comparison-card.after .comparison-label {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .readme-mock {
+        padding: 25px;
+        min-height: 280px;
+    }
+
+    .readme-mock.styled {
+        background: linear-gradient(180deg, rgba(34, 197, 94, 0.03) 0%, transparent 100%);
+    }
+
+    .transform-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        color: var(--primary);
+        animation: pulse-arrow 2s infinite;
+    }
+
+    .transform-arrow i {
+        font-size: 2.5rem;
+    }
+
+    .transform-arrow span {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    @keyframes pulse-arrow {
+
+        0%,
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        50% {
+            transform: translateX(10px);
+            opacity: 0.7;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .before-after-container {
+            flex-direction: column;
+        }
+
+        .transform-arrow {
+            transform: rotate(90deg);
+            margin: 20px 0;
+        }
+    }
+</style>
+<style>
+    /* Hero Slider Styles */
+    .hero-slider {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        /* Fill the browser-frame */
+        min-height: 400px;
+        /* Fallback height */
+        overflow: hidden;
+        background: #0f172a;
+        border-radius: 0 0 12px 12px;
+        /* Match browser frame border radius */
+    }
+
+    .hero-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out, transform 0.8s ease-out;
+        transform: scale(1.05);
+        /* Zoom effect */
+    }
+
+    .hero-slide.active {
+        opacity: 1;
+        transform: scale(1);
+        z-index: 1;
+    }
+
+    .hero-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Cover container without distortion */
+        object-position: top center;
+        /* Focus on top part */
+    }
+
+    /* Slide Caption Badge */
+    .slide-caption {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(99, 102, 241, 0.9);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.5s 0.3s;
+    }
+
+    .hero-slide.active .slide-caption {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Browser Tabs Styles */
+    .browser-tabs {
+        display: flex;
+        align-items: flex-end;
+        margin-left: 20px;
+        gap: 5px;
+        height: 100%;
+        padding-top: 5px;
+    }
+
+    .browser-tabs .tab {
+        padding: 6px 15px;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px 6px 0 0;
+        cursor: default;
+        transition: all 0.3s;
+    }
+
+    .browser-tabs .tab.active {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    // Hero Slider Logic
+    const slides = document.querySelectorAll('.hero-slide');
+    const tabs = document.querySelectorAll('.browser-tabs .tab');
+    let currentSlide = 0;
+
+    function nextSlide() {
+        // Remove active class from current
+        slides[currentSlide].classList.remove('active');
+        tabs[currentSlide].classList.remove('active');
+
+        // Move to next
+        currentSlide = (currentSlide + 1) % slides.length;
+
+        // Add active class to new
+        slides[currentSlide].classList.add('active');
+        tabs[currentSlide].classList.add('active');
+    }
+
+    // Change slide every 4 seconds
+    setInterval(nextSlide, 4000);
+</script>
+<style>
+    /* Ensure browser frame has a fixed aspect ratio or height */
+    .browser-frame {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        aspect-ratio: 16/10;
+        /* Force aspect ratio */
+    }
+
+    /* Make sure slider takes remaining height */
+    .hero-slider {
+        flex: 1;
+        min-height: 0;
+        /* Allow flex shrink */
+    }
+</style>
+<style>
+    /* GLOBAL FORCE RESET FOR BROWSER FRAMES */
+    .browser-frame,
+    .browser-frame.small {
+        width: 100% !important;
+        max-width: 100% !important;
+        aspect-ratio: 16/10 !important;
+        /* Standart oran: MacBook ekranı gibi */
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        background: #1e1e2e !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Header her zaman üstte kalsın */
+    .browser-header {
+        flex-shrink: 0 !important;
+        height: 36px !important;
+        z-index: 2 !important;
+    }
+
+    /* İçerik her zaman alanı kaplasın */
+    .browser-frame img,
+    .hero-slider,
+    .hero-slide,
+    .hero-slide img {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        object-fit: cover !important;
+        /* Resim çerçeveye tam otursun */
+        object-position: top center !important;
+        /* Resmin üst kısmı görünsün */
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 0 12px 12px !important;
+    }
+
+    /* Browser Header Dots Fix */
+    .browser-header {
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        background: #2a2b3d;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Slider özel ayarı */
+    .hero-slider {
+        position: relative !important;
+        border-radius: 0 0 12px 12px !important;
+    }
+
+    .hero-slide {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+    }
+</style>
+<style>
+    /* Hero README Mock Styles */
+    .readme-mock-hero {
+        width: 100%;
+        height: 100%;
+        background: #0d1117;
+        /* GitHub Dark Dimmed */
+        color: #c9d1d9;
+        padding: 30px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        overflow: hidden;
+        position: relative;
+    }
+</style>
+<style>
+    /* --- VERCEL-INSPIRED GLOBAL STYLES --- */
+
+    /* 1. Global Grid Background */
+    .global-grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        pointer-events: none;
+    }
+
+    /* 2. Vertical Connecting Line */
+    .connecting-line-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        /* Subtle static line */
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .connecting-beam {
+        position: absolute;
+        top: -100px;
+        left: 0;
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(180deg, transparent, #ec4899, transparent);
+        animation: beam-drop 3s infinite ease-in-out;
+        opacity: 0.7;
+    }
+
+    @keyframes beam-drop {
+        0% {
+            top: -20%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 120%;
+            opacity: 0;
+        }
+    }
+
+    /* 3. Section Connectors */
+    .section-connector-dot {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 12px;
+        background: #0f172a;
+        border: 2px solid #334155;
+        border-radius: 50%;
+        z-index: 10;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 4. Unified Typography */
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        letter-spacing: -0.01em;
+    }
+
+    h1,
+    h2,
+    h3 {
+        letter-spacing: -0.03em;
+        /* Tight tracking for headings */
+    }
+</style>
+<style>
+    /* --- BENTO GRID STYLES --- */
+    .pain-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+        .pain-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pain-card {
+        background: rgba(15, 23, 42, 0.6);
+        /* Semi-transparent slate */
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: left;
+        /* Align text left for premium feel */
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .pain-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Make the 3rd card span full width */
+    .pain-card:nth-child(3) {
+        grid-column: span 2;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .pain-card:nth-child(3) {
+            grid-column: span 1;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    .pain-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        color: var(--accent);
+        background: rgba(236, 72, 153, 0.1);
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+    }
+
+    .pain-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #f8fafc;
+    }
+
+    .pain-card p {
+        color: #94a3b8;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* Connecting Line Dot on Section Headers */
+    .section-header {
+        position: relative;
+    }
+
+    .section-header::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        /* Connect to line above */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 60px;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.2));
+    }
+</style>
+<style>
+    /* --- HEADLINE ROTATOR STYLES --- */
+    /* --- HEADLINE ROTATOR STYLES FIXED --- */
+    .headline-rotator {
+        position: relative;
+        /* Enough height to contain 2 lines of large text */
+        height: 180px;
+        margin-bottom: 30px;
+        width: 100%;
+        /* Ensure it doesn't overflow horizontally */
+        max-width: 100%;
+    }
+
+    .hero-title {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        margin: 0;
+
+        /* Typography */
+        font-size: 3.5rem;
+        line-height: 1.1;
+        letter-spacing: -0.04em;
+        font-weight: 800;
+        text-align: center;
+
+        /* Animation State: Hidden */
+        opacity: 0;
+        visibility: hidden;
+        filter: blur(8px);
+        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .hero-title.active {
+        /* Animation State: Visible */
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1);
+        filter: blur(0);
+        z-index: 2;
+    }
+
+    /* Entering state (optional, handled by active transition) */
+    .hero-title:not(.active) {
+        transform: translate(-50%, -40%) scale(0.95);
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 768px) {
+        .headline-rotator {
+            height: 140px;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+        }
+    }
+
+
+    /* --- CIRCUIT CONNECTION LINES STYLES --- */
+    .connection-circuit-lines {
+        position: absolute;
+        top: -80px;
+        /* Connects from above the image */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 80px;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    /* Vertical Line from Text to Frame */
+    .circuit-v {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(236, 72, 153, 0) 0%, rgba(236, 72, 153, 0.8) 50%, #ec4899 100%);
+        box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
+    }
+
+    /* Horizontal Branching Lines (Optional visuals) */
+    .circuit-h {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        /* Width of the T-junction */
+        height: 2px;
+        background: #ec4899;
+        box-shadow: 0 0 10px #ec4899;
+        opacity: 0;
+        animation: circuit-horizontal-expand 1s forwards 0.5s;
+    }
+
+    /* The Connection Dot on the Frame */
+    .circuit-dot {
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        /* Centered relative to the vertical line */
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #fff, 0 0 20px #ec4899;
+        transform: translateX(-50%);
+        z-index: 20;
+    }
+
+    @keyframes circuit-horizontal-expand {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+
+        to {
+            width: 60px;
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .headline-rotator {
+            height: 100px;
+        }
+    }
+</style>
+
+<script>
+    // Headline Rotator Logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const heroTitles = document.querySelectorAll('.hero-title');
+        let currentHeroIndex = 0;
+
+        if (heroTitles.length > 0) {
+            setInterval(() => {
+                // Remove active class from current
+                heroTitles[currentHeroIndex].classList.remove('active');
+
+                // Move to next
+                currentHeroIndex = (currentHeroIndex + 1) % heroTitles.length;
+
+                // Add active class to next
+                heroTitles[currentHeroIndex].classList.add('active');
+            }, 4000); // Change every 4 seconds
+        }
+    });
+</script>
+<style>
+    /* === HERO LAYOUT FIX === */
+    .hero {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 120px 20px 80px !important;
+        min-height: 100vh !important;
+        position: relative !important;
+    }
+
+    .hero-content {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        width: 100% !important;
+        max-width: 900px !important;
+        margin: 0 auto !important;
+    }
+
+    .hero-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 16px !important;
+        background: rgba(99, 102, 241, 0.1) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-radius: 50px !important;
+        font-size: 0.85rem !important;
+        color: var(--primary) !important;
+        margin-bottom: 30px !important;
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+    }
+
+    /* Fix headline-rotator centering */
+    .headline-rotator {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        position: relative !important;
+        height: 160px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .hero-title {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 100% !important;
+        text-align: center !important;
+        margin: 0 !important;
+        padding: 0 20px !important;
+        font-size: 3.5rem !important;
+        line-height: 1.15 !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.03em !important;
+        color: #fff !important;
+    }
+
+    .hero-title.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 2 !important;
+    }
+
+    .hero-title:not(.active) {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    .hero-subtitle {
+        font-size: 1.15rem !important;
+        color: #94a3b8 !important;
+        max-width: 600px !important;
+        margin: 0 auto 30px !important;
+        line-height: 1.6 !important;
+        text-align: center !important;
+    }
+
+    .cta-group {
+        display: flex !important;
+        gap: 15px !important;
+        justify-content: center !important;
+        margin-bottom: 20px !important;
+    }
+
+    .login-hint {
+        color: #64748b !important;
+        font-size: 0.9rem !important;
+        margin-bottom: 15px !important;
+    }
+
+    .demo-link {
+        color: #6366f1 !important;
+        font-size: 0.95rem !important;
+        text-decoration: none !important;
+        margin-bottom: 40px !important;
+    }
+
+    .hero-image-container {
+        width: 100% !important;
+        max-width: 900px !important;
+        margin: 0 auto !important;
+        position: relative !important;
+    }
+
+    /* Mobile Fix */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem !important;
+        }
+
+        .headline-rotator {
+            height: 120px !important;
+        }
+
+        .cta-group {
+            flex-direction: column !important;
+        }
+    }
+</style>
+<style>
+    /* === GLOBAL SECTION CONNECTORS === */
+
+    /* Main vertical spine line - runs through entire page */
+    .global-spine {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(99, 102, 241, 0.1) 10%,
+                rgba(99, 102, 241, 0.2) 50%,
+                rgba(99, 102, 241, 0.1) 90%,
+                transparent 100%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Section connector - appears at start of each section */
+    .section-connector {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 auto 40px;
+        z-index: 5;
+    }
+
+    /* Vertical line segment going into section */
+    .connector-line {
+        width: 1px;
+        height: 60px;
+        background: linear-gradient(180deg, rgba(236, 72, 153, 0.3), rgba(236, 72, 153, 0.8));
+        box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+    }
+
+    /* Glowing dot at connection point */
+    .connector-dot {
+        width: 10px;
+        height: 10px;
+        background: #ec4899;
+        border-radius: 50%;
+        box-shadow: 0 0 15px #ec4899, 0 0 30px rgba(236, 72, 153, 0.5);
+        animation: dot-pulse 2s infinite;
+    }
+
+    @keyframes dot-pulse {
+
+        0%,
+        100% {
+            box-shadow: 0 0 15px #ec4899, 0 0 30px rgba(236, 72, 153, 0.5);
+        }
+
+        50% {
+            box-shadow: 0 0 20px #ec4899, 0 0 40px rgba(236, 72, 153, 0.8);
+        }
+    }
+
+    /* Horizontal branch lines (for spanning to content) */
+    .connector-branch {
+        position: relative;
+        width: 100px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.5), transparent);
+    }
+
+    /* Different color variants for variety */
+    .connector-line.blue {
+        background: linear-gradient(180deg, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 0.8));
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+
+    .connector-dot.blue {
+        background: #6366f1;
+        box-shadow: 0 0 15px #6366f1, 0 0 30px rgba(99, 102, 241, 0.5);
+    }
+
+    .connector-line.green {
+        background: linear-gradient(180deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.8));
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+
+    .connector-dot.green {
+        background: #22c55e;
+        box-shadow: 0 0 15px #22c55e, 0 0 30px rgba(34, 197, 94, 0.5);
+    }
+
+    /* Hide circuit lines if they're duplicating */
+    .connection-circuit-lines {
+        display: none !important;
+    }
+</style><style>
+/* === ASPECT RATIO FIX FOR ACTUAL IMAGE === */
+/* Image is 3406x1742 = ~1.95:1 ratio */
+.browser-frame {
+    aspect-ratio: 1.95 / 1 !important; /* Match actual screenshot ratio */
+}
+
+.hero-slider {
+    aspect-ratio: 1.95 / 1 !important;
+}
+</style>
+<style>
+/* === HOVER ZOOM EFFECT FOR HERO IMAGE === */
+.hero-image-container {
+    transition: transform 0.4s ease !important;
+    cursor: zoom-in;
+}
+
+.hero-image-container:hover {
+    transform: scale(1.05) !important;
+    z-index: 100;
+}
+
+.hero-image-container:hover .browser-frame {
+    box-shadow: 0 40px 80px -20px rgba(99, 102, 241, 0.3), 
+                0 20px 40px -10px rgba(0,0,0,0.5) !important;
+}
+
+/* Also make the slider images zoom slightly on hover */
+.hero-slide img {
+    transition: transform 0.6s ease !important;
+}
+
+.hero-image-container:hover .hero-slide.active img {
+    transform: scale(1.02) !important;
+}
+</style>

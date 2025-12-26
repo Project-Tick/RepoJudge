@@ -105,6 +105,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     updateUI();
     checkAuth();
+
+    // Check for demo mode (?demo=owner/repo)
+    const urlParams = new URLSearchParams(window.location.search);
+    const demoRepo = urlParams.get('demo');
+    if (demoRepo) {
+        // Convert short form (facebook/react) to full URL
+        const fullUrl = demoRepo.startsWith('http')
+            ? demoRepo
+            : `https://github.com/${demoRepo}`;
+        repoUrlInput.value = fullUrl;
+        // Small delay to ensure UI is ready
+        setTimeout(() => startAnalysis(), 500);
+    }
 });
 
 // Check authentication status

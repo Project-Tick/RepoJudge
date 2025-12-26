@@ -11,7 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=9">
+    <link rel="stylesheet" href="css/style.css?v=11">
 
     <!-- Critical CSS - prevents flash of unstyled content -->
     <style>
@@ -200,6 +200,16 @@
                             <p id="summaryText">Analysis summary will appear here...</p>
                         </div>
 
+                        <!-- Recommendations - PROMINENT POSITION -->
+                        <div class="recommendations-section highlight-section">
+                            <div class="section-header">
+                                <h3><i class='bx bx-bulb'></i> 💡 Öneriler <span class="section-badge">AI Powered</span>
+                                </h3>
+                                <p class="section-subtitle">Projenizi bir üst seviyeye taşımak için yapılabilecekler</p>
+                            </div>
+                            <div id="recommendationsList" class="recommendations-grid"></div>
+                        </div>
+
                         <div class="grid-2-col">
                             <div class="issues-section">
                                 <div class="section-header">
@@ -220,14 +230,6 @@
                                 <h3 data-i18n="errors"><i class='bx bx-error'></i> Errors & Critical Issues</h3>
                             </div>
                             <div id="errorsList" class="issues-grid"></div>
-                        </div>
-
-                        <!-- Recommendations -->
-                        <div class="issues-section recommendations-section">
-                            <div class="section-header">
-                                <h3><i class='bx bx-bulb'></i> Öneriler</h3>
-                            </div>
-                            <div id="recommendationsList" class="recommendations-grid"></div>
                         </div>
                     </div>
 
