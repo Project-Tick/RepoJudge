@@ -419,92 +419,162 @@ body {
     border-radius: 4px;
 }
 
-/* User Section */
-.user-section {
-    margin-bottom: 15px;
+/* Sidebar Footer & Settings */
+.sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+    position: relative;
+    /* For popover positioning */
 }
 
-.github-login-btn {
+.user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    background: transparent;
+    border: none;
+    text-align: left;
+    color: var(--text-primary);
+}
+
+.user-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-avatar-container {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    /* ChatGPT style is slightly rounded square or circle */
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+}
+
+.avatar-img {
     width: 100%;
-    padding: 12px 16px;
-    background: #24292e;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    font-family: var(--font-main);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s;
+    height: 100%;
+    object-fit: cover;
 }
 
-.github-login-btn:hover {
-    background: #2f363d;
-}
-
-.github-login-btn i {
-    font-size: 1.3rem;
+.avatar-placeholder {
+    font-size: 1.2rem;
+    color: var(--text-muted);
 }
 
 .user-info {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-}
-
-.user-info.hidden {
-    display: none;
-}
-
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .user-name {
-    flex: 1;
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-primary);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.language-toggle {
+.user-plan {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.menu-icon {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+/* Settings Popover */
+.settings-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 10px;
+    width: calc(100% - 20px);
+    background: #18181b;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 8px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.settings-menu .menu-item {
     display: flex;
-    gap: 5px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: 8px;
-}
-
-.lang-btn {
-    flex: 1;
-    padding: 8px;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-family: var(--font-main);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
     border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
     transition: all 0.2s;
 }
 
-.lang-btn.active {
+.settings-menu .menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.settings-menu .menu-item i {
+    font-size: 1.1rem;
+}
+
+.settings-menu .menu-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 6px 0;
+}
+
+.settings-menu .menu-item.danger {
+    color: var(--danger);
+}
+
+.settings-menu .menu-item.danger:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
+/* Login Button (matches user-menu-btn style but simplified) */
+.login-btn-sidebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
     background: var(--primary);
     color: white;
+    border: none;
+    font-weight: 500;
+    font-family: var(--font-main);
+    justify-content: center;
+    transition: filter 0.2s;
+}
+
+.login-btn-sidebar:hover {
+    filter: brightness(1.1);
 }
 
 /* Main Content */
@@ -622,6 +692,46 @@ body {
 
 .analyze-btn i {
     font-size: 1.2rem;
+}
+
+/* Model Selector */
+.model-selector-container {
+    position: relative;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding-left: 12px;
+}
+
+.model-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 32px 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    min-width: 160px;
+}
+
+.model-select:hover,
+.model-select:focus {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+    outline: none;
+}
+
+.model-select option {
+    background: #18181b;
+    color: var(--text-primary);
+    padding: 12px;
 }
 
 /* Loading Screen */
@@ -1441,6 +1551,7 @@ body {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
+
 /* Recommendations */
 .recommendations-grid {
     display: grid;
@@ -1821,7 +1932,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
     opacity: 0;
     transition: opacity 0.3s;
 }
@@ -1832,7 +1943,7 @@ body {
 
 .issue-item:hover {
     transform: translateX(5px);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 /* Severity-based left border colors */

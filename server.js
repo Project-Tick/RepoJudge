@@ -50,7 +50,7 @@ function getAuthToken(req) {
 
 // API Routes
 app.post('/api/generate', async (req, res) => {
-    const { repoUrl, language } = req.body;
+    const { repoUrl, language, forceRefresh } = req.body;
     const authToken = getAuthToken(req);
 
     if (!repoUrl) {
@@ -77,10 +77,13 @@ app.post('/api/generate', async (req, res) => {
 
         // Cache Check
         const cacheKey = `readme:${owner}:${repo}:${language || 'en'}`;
-        const cachedResult = await getCache(cacheKey);
-        if (cachedResult) {
-            console.log(`[Cache Hit] Serving README for ${owner}/${repo}`);
-            return res.json({ success: true, readme: cachedResult });
+
+        if (!forceRefresh) {
+            const cachedResult = await getCache(cacheKey);
+            if (cachedResult) {
+                console.log(`[Cache Hit] Serving README for ${owner}/${repo}`);
+                return res.json({ success: true, readme: cachedResult });
+            }
         }
 
         console.log(`Fetching structure for ${owner}/${repo}...`);
@@ -107,40 +110,36 @@ app.post('/api/generate', async (req, res) => {
 });
 
 app.post('/api/analyze', async (req, res) => {
-    const { repoUrl, language } = req.body;
+
+    const { repoUrl, language, forceRefresh, model } = req.body;
     const authToken = getAuthToken(req);
 
-    if (!repoUrl) return res.status(400).json({ error: 'Repository URL is required' });
+    if (!repoUrl) {
+        return res.status(400).json({ error: 'GitHub repository URL is required' });
+    }
 
     try {
-        let owner, repo;
-        if (repoUrl.includes('github.com')) {
-            const parts = repoUrl.split('github.com/')[1].split('/');
-            owner = parts[0];
-            repo = parts[1]?.replace('.git', '');
-        } else {
-            const parts = repoUrl.split('/');
-            owner = parts[0];
-            repo = parts[1];
-        }
+        const { owner, repo } = parseGitHubUrl(repoUrl);
 
         // Cache Check
-        const cacheKey = `analysis:${owner}:${repo}:${language || 'en'}`;
-        const cachedAnalysis = await getCache(cacheKey);
-        if (cachedAnalysis) {
-            console.log(`[Cache Hit] Serving Analysis for ${owner}/${repo}`);
-            return res.json({ success: true, analysis: cachedAnalysis });
+        const cacheKey = `analysis:${owner}:${repo}:${language || 'en'}:${model || 'flash'}`;
+
+        if (!forceRefresh) {
+            const cachedAnalysis = await getCache(cacheKey);
+            if (cachedAnalysis) {
+                console.log(`[Cache Hit] Serving Analysis for ${owner}/${repo}`);
+                return res.json({ success: true, analysis: cachedAnalysis, cached: true });
+            }
         }
 
-        const fileStructure = await getRepoStructure(owner, repo, authToken);
-        const fileContents = await getFileContents(owner, repo, fileStructure, authToken);
+        const { fileStructure, fileContents } = await fetchRepoContent(owner, repo, authToken);
 
-        const analysis = await analyzeRepo(repo, fileStructure, fileContents, language || 'en');
+        const analysis = await analyzeRepo(repo, fileStructure, fileContents, language || 'en', model);
 
         // Set Cache
         await setCache(cacheKey, analysis, 3600);
 
-        res.json({ success: true, analysis });
+        res.json({ success: true, analysis, cached: false });
     } catch (error) {
         console.error('Error in /api/analyze:', error.message);
         res.status(500).json({ error: 'Failed to analyze repository' });
@@ -148,36 +147,21 @@ app.post('/api/analyze', async (req, res) => {
 });
 
 app.post('/api/chat', async (req, res) => {
-    const { repoUrl, history, message, language } = req.body;
+    const { repoUrl, message, history, language, model } = req.body;
     const authToken = getAuthToken(req);
 
     if (!repoUrl || !message) return res.status(400).json({ error: 'Missing repository URL or message' });
 
     try {
-        const { getRepoStructure, getFileContents } = require('./src/services/github');
-        const { chatWithRepo } = require('./src/services/gemini');
+        const { owner, repo } = parseGitHubUrl(repoUrl);
+        const { fileStructure, fileContents } = await fetchRepoContent(owner, repo, authToken);
 
-        let owner, repo;
-        if (repoUrl.includes('github.com')) {
-            const parts = repoUrl.split('github.com/')[1].split('/');
-            owner = parts[0];
-            repo = parts[1]?.replace('.git', '');
-        } else {
-            const parts = repoUrl.split('/');
-            owner = parts[0];
-            repo = parts[1];
-        }
-
-        // Ideally we should cache this to avoid re-fetching on every message
-        const fileStructure = await getRepoStructure(owner, repo, authToken);
-        const fileContents = await getFileContents(owner, repo, fileStructure, authToken);
-
-        const response = await chatWithRepo(repo, fileStructure, fileContents, history || [], message, language || 'en');
+        const response = await chatWithRepo(`${owner}/${repo}`, fileStructure, fileContents, history || [], message, language || 'en', model);
 
         res.json({ success: true, response });
-    } catch (error) {
-        console.error('Error in /api/chat:', error.message);
-        res.status(500).json({ error: 'Failed to chat with repository' });
+    } catch (err) {
+        console.error('Chat Error:', err);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 

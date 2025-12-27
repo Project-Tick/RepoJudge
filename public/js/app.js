@@ -100,11 +100,29 @@ document.addEventListener('DOMContentLoaded', () => {
         else btn.classList.remove('active');
     });
 
+    // Initialize Model Selector
+    const savedModel = localStorage.getItem('repojudge_model') || 'flash';
+    const modelSelect = document.getElementById('modelSelect');
+    if (modelSelect) {
+        modelSelect.value = savedModel;
+        modelSelect.addEventListener('change', () => {
+            localStorage.setItem('repojudge_model', modelSelect.value);
+        });
+    }
+
+
+
+    // Init Logic
+    console.log('App Initializing...');
     loadHistory();
-    checkAuth();
     setupEventListeners();
     updateUI();
-    checkAuth();
+
+    // Check auth last
+    setTimeout(() => {
+        console.log('Checking Auth...');
+        checkAuth();
+    }, 100);
 
     // Check for demo mode (?demo=owner/repo)
     const urlParams = new URLSearchParams(window.location.search);
@@ -126,25 +144,66 @@ async function checkAuth() {
         const res = await fetch('/auth/user');
         const data = await res.json();
 
-        const loginBtn = document.getElementById('loginBtn');
-        const userInfo = document.getElementById('userInfo');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const reposSection = document.getElementById('reposSection');
+        // Safe DOM Element Getter
+        const getEl = (id) => document.getElementById(id);
 
-        if (data.authenticated) {
-            loginBtn.classList.add('hidden');
-            userInfo.classList.remove('hidden');
-            userAvatar.src = data.user.avatar;
-            userName.textContent = data.user.name || data.user.login;
+        const els = {
+            userAvatar: getEl('userAvatar'),
+            defaultAvatar: getEl('defaultAvatar'),
+            userName: getEl('userName'),
+            userPlan: getEl('userPlan'),
+            loginItem: getEl('loginMenuItem'),
+            profileItem: getEl('profileMenuItem'),
+            authDivider: getEl('authDivider'),
+            logoutItem: getEl('logoutMenuItem'),
+            reposSection: getEl('reposSection')
+        };
 
-            // Show and load user repos
-            reposSection.classList.remove('hidden');
-            loadUserRepos();
+        const setClass = (el, type, className = 'hidden') => {
+            if (el) el.classList[type](className);
+        };
+
+        if (data.authenticated && data.user) {
+            console.log('User authenticated:', data.user.login);
+
+            // User Data
+            if (els.userAvatar) {
+                els.userAvatar.src = data.user.avatar || '';
+                setClass(els.userAvatar, 'remove');
+            }
+            setClass(els.defaultAvatar, 'add');
+
+            if (els.userName) els.userName.textContent = data.user.name || data.user.login || 'User';
+            if (els.userPlan) els.userPlan.textContent = 'Pro Plan';
+
+            // Menu State
+            setClass(els.loginItem, 'add');
+            setClass(els.profileItem, 'remove');
+            setClass(els.authDivider, 'remove');
+            setClass(els.logoutItem, 'remove');
+
+            // Repos
+            if (els.reposSection) {
+                setClass(els.reposSection, 'remove');
+                loadUserRepos();
+            }
         } else {
-            loginBtn.classList.remove('hidden');
-            userInfo.classList.add('hidden');
-            reposSection.classList.add('hidden');
+            console.log('User not authenticated');
+
+            // Guest Data
+            setClass(els.userAvatar, 'add');
+            setClass(els.defaultAvatar, 'remove');
+
+            if (els.userName) els.userName.textContent = 'Guest';
+            if (els.userPlan) els.userPlan.textContent = 'Free Plan';
+
+            // Menu State
+            setClass(els.loginItem, 'remove');
+            setClass(els.profileItem, 'add');
+            setClass(els.authDivider, 'add');
+            setClass(els.logoutItem, 'add');
+
+            setClass(els.reposSection, 'add');
         }
     } catch (err) {
         console.error('Auth check failed:', err);
@@ -229,15 +288,40 @@ function setupEventListeners() {
     newAnalysisBtn.addEventListener('click', showWelcomeScreen);
 
     // Language toggle
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            selectedLang = btn.dataset.lang;
+    // Settings Menu Logic
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const settingsMenu = document.getElementById('settingsMenu');
+
+    // Toggle Menu
+    userMenuBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.toggle('active');
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (settingsMenu && !settingsMenu.contains(e.target) && !userMenuBtn.contains(e.target)) {
+            settingsMenu.classList.remove('active');
+        }
+    });
+
+    // Language Toggle
+    const langToggle = document.getElementById('langToggleItem');
+    if (langToggle) {
+        // Initialize display
+        const display = document.getElementById('currentLangDisplay');
+        if (display) display.textContent = selectedLang.toUpperCase();
+
+        langToggle.addEventListener('click', () => {
+            selectedLang = selectedLang === 'en' ? 'tr' : 'en';
             localStorage.setItem('repojudge_lang', selectedLang);
             updateUI();
         });
-    });
+    }
+
+    // Login/Logout Actions
+    document.getElementById('loginMenuItem')?.addEventListener('click', () => window.location.href = '/auth/github');
+    document.getElementById('logoutMenuItem')?.addEventListener('click', () => window.location.href = '/auth/logout');
 
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -332,7 +416,8 @@ function setupChat() {
                     repoUrl: currentAnalysis.repoUrl,
                     message: text,
                     history: history,
-                    language: selectedLang
+                    language: selectedLang,
+                    model: document.getElementById('modelSelect')?.value || 'flash'
                 })
             });
             const data = await res.json();
@@ -437,12 +522,20 @@ function updateUI() {
             el.textContent = translations[selectedLang][key];
         }
     });
+
+    // Update Lang Display
+    const display = document.getElementById('currentLangDisplay');
+    if (display) display.textContent = selectedLang.toUpperCase();
+
     renderHistory();
 }
 
 // Analysis Flow
-async function startAnalysis() {
+async function startAnalysis(options = {}) {
     const url = repoUrlInput.value.trim();
+    const { forceRefresh = false } = options;
+    const model = document.getElementById('modelSelect')?.value || 'flash';
+
     if (!url) return;
 
     showLoadingScreen();
@@ -453,12 +546,12 @@ async function startAnalysis() {
             fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ repoUrl: url, language: selectedLang })
+                body: JSON.stringify({ repoUrl: url, language: selectedLang, forceRefresh, model })
             }),
             fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ repoUrl: url, language: selectedLang })
+                body: JSON.stringify({ repoUrl: url, language: selectedLang, forceRefresh, model })
             })
         ]);
 
@@ -565,8 +658,13 @@ function renderAnalysis() {
         .map(s => `<li>${s}</li>`).join('');
 
     // Competitors
-    document.getElementById('competitorsList').innerHTML = (analysis.competitors || [])
-        .map(c => `<li>${c}</li>`).join('');
+    const competitors = analysis.competitors || [];
+    document.getElementById('competitorsList').innerHTML = competitors
+        .map(c => {
+            const name = typeof c === 'string' ? c : c.name;
+            const category = c.category ? `(${c.category})` : '';
+            return `<li>${name} <span style="font-size: 0.8em; color: var(--text-muted)">${category}</span></li>`;
+        }).join('');
 
     // Errors tab (critical + high)
     const errors = issues.filter(i => ['critical', 'high'].includes(i.severity));
@@ -824,7 +922,7 @@ function renderHistory() {
                 renderHistory();
             } else if (action === 'reanalyze') {
                 repoUrlInput.value = entry.url;
-                startAnalysis();
+                startAnalysis({ forceRefresh: true });
             } else if (action === 'github') {
                 window.open(entry.url, '_blank');
             }
