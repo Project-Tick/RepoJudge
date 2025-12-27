@@ -118,4 +118,4 @@ MIT License - feel free to use this project however you want!
 
 ---
 
-**Made with ❤️ by Abdullah**
+**Made with ❤️ by [grxtor](https://github.com/grxtor)**
