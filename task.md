@@ -24,35 +24,20 @@
 ## 🚧 Sırada Yapılacaklar (Roadmap)
 
 ### 1. 🌐 Canlıya Alma (Deployment)
-- [ ] **VDS Sunucu:** Ubuntu 22.04 sunucu satın alınacak (Kullanıcı IP bilgisini bekliyor).
-- [ ] **Linux Kurulumu:** Sunucuya Node.js, Git, PM2 ve Nginx kurulacak.
-- [ ] **Domain Bağlama:** `grxtor.me` ve `repojudge.grxtor.me` alan adları sunucuya yönlendirilecek.
-- [ ] **SSL Sertifikası:** Sitenin güvenli olması için (https) Let's Encrypt kurulacak.
-- [ ] **OAuth Güncellemesi:** GitHub ayarlarındaki `localhost:3000` adresleri yeni domain ile değiştirilecek.
+- [ ] **VDS Sunucu:** Ubuntu 22.04 sunucu satın alınacak.
+- [ ] **Domain & SSL:** `repojudge.grxtor.me` yönlendirmesi ve HTTPS kurulumu.
 
-### 2. 🖥️ Masaüstü Uygulaması (Cross-Platform)
-- [ ] **Electron.js:** Projeye Electron kütüphanesi eklenecek.
-- [ ] **Main Process:** Uygulama penceresini yöneten ana dosya yazılacak.
-- [ ] **Paketleme:** macOS için `.dmg` veya `.app` dosyası oluşturulacak (Build).
-- [ ] **İkon:** Uygulama için havalı bir macOS ikonu (.icns) ayarlanacak.
+### 2. 🎨 Gelişmiş UX & ChatGPT Stili
+- [ ] **Pro Ayarlar Menüsü:** ChatGPT tarzı popover ayarlar paneli.
+- [ ] **Klasörleme:** Sidebar geçmişi için sürükle-bırak klasör desteği.
+- [ ] **Floating Chat:** Sağ alta yüzen profesyonel AI asistan balonu.
 
-### 3. ✨ Yeni Özellikler (Onaylananlar)
-- [x] 🤖 Model Seçimi (Gemini 3.0 Flash/Pro) - **Completed**
-  - [x] Backend feature implementation (model param handling)
-  - [x] Frontend selector UI
-  - [x] Data persistence (localStorage)
-- [x] ⚙️ Ayarlar Menüsü (ChatGPT Style)
-  - [x] Sidebar Footer implementation
-  - [x] User Profile/Guest toggle
-  - [x] Language settings integrated
-- [x] 🔍 Derin Analiz Modu (Implemented)
-  - [x] Enhanced Gemini Prompts
-  - [x] Detailed scoring logic
-  - [x] Multi-language support (TR/EN)
-- [ ] **🆚 Repo VS Repo:** İki repoyu kıyaslama modu. (Kodlanacak)
+### 3. 🖥️ Masaüstü Uygulaması
+- [ ] **Electron.js:** macOS/Windows için yerel uygulama ve paketleme.
 
-### 4. 🌐 Canlıya Alma (Deployment)
+### 4. 🆚 Repo VS Repo
+- [ ] İki repoyu kıyaslayan yan yana (split-view) analiz modu.
 
 ---
 
-**Not:** Şu an ana odak noktamız sunucu bilgilerini (IP) bekleyip projeyi **`repojudge.grxtor.me`** adresinde canlıya almaktır.
+**Not:** Önceliğimiz UX iyileştirmeleri ve ardından sunucu bilgilerini bekleyerek canlıya almaktır.

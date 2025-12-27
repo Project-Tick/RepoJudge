@@ -4,8 +4,8 @@ require('dotenv').config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const MODELS = {
-    flash: "gemini-3-flash-preview",
-    pro: "gemini-3-pro-preview"
+    flash: "gemini-2.0-flash-exp",
+    pro: "gemini-1.5-pro"
 };
 
 // Enhanced configuration for better AI responses

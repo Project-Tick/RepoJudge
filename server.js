@@ -8,7 +8,7 @@ const { redisClient, connectRedis, getCache, setCache } = require('./src/service
 const RedisStore = require('connect-redis').RedisStore;
 
 const { getRepoStructure, getFileContents } = require('./src/services/github');
-const { generateReadme, analyzeRepo } = require('./src/services/gemini');
+const { generateReadme, analyzeRepo, chatWithRepo } = require('./src/services/gemini');
 const authRoutes = require('./src/routes/auth');
 
 const app = express();
@@ -168,3 +168,25 @@ app.post('/api/chat', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// --- HELPER FUNCTIONS ---
+
+function parseGitHubUrl(repoUrl) {
+    let owner, repo;
+    if (repoUrl.includes('github.com')) {
+        const parts = repoUrl.split('github.com/')[1].split('/');
+        owner = parts[0];
+        repo = parts[1]?.replace('.git', '');
+    } else {
+        const parts = repoUrl.split('/');
+        owner = parts[0];
+        repo = parts[1];
+    }
+    return { owner, repo };
+}
+
+async function fetchRepoContent(owner, repo, authToken) {
+    const fileStructure = await getRepoStructure(owner, repo, authToken);
+    const fileContents = await getFileContents(owner, repo, fileStructure, authToken);
+    return { fileStructure, fileContents };
+}

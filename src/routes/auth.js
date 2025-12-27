@@ -60,16 +60,20 @@ router.get('/github/callback', async (req, res) => {
 
 // Get current user
 router.get('/user', (req, res) => {
+    console.log('[Auth] /user request. Session User:', req.session?.user ? req.session.user.login : 'NONE');
     if (req.session.user) {
-        res.json({
+        const userData = {
             authenticated: true,
             user: {
                 login: req.session.user.login,
                 name: req.session.user.name,
                 avatar: req.session.user.avatar
             }
-        });
+        };
+        console.log('[Auth] Returning User Data:', userData.user.login);
+        res.json(userData);
     } else {
+        console.log('[Auth] No session found. Returning authenticated: false');
         res.json({ authenticated: false });
     }
 });

@@ -11,7 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=11">
+    <link rel="stylesheet" href="css/style.css?v=26">
 
     <!-- Critical CSS - prevents flash of unstyled content -->
     <style>
@@ -67,24 +67,23 @@
                 <i class='bx bx-plus'></i> <span data-i18n="newAnalysis">New Analysis</span>
             </button>
 
-            <!-- History -->
-            <div class="history-section">
-                <h4 data-i18n="history">Analysis History</h4>
-                <div id="historyList" class="history-list">
-                    <!-- History items will be populated here -->
-                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;"
-                        data-i18n="noHistory">
-                        No analysis history yet
+            <!-- Navigation / Scrollable Area -->
+            <div class="sidebar-nav">
+                <!-- History Items -->
+                <div id="historySection" class="history-section">
+                    <div class="section-header">
+                        <h4 data-i18n="history">Analysis History</h4>
+                        <button id="newFolderBtn" class="icon-btn-small" title="New Folder">
+                            <i class='bx bx-folder-plus'></i>
+                        </button>
+                    </div>
+                    <div id="historyList" class="history-list">
+                        <!-- populated by JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- Stats -->
-            <div id="sidebarStats" class="sidebar-stats">
-                <!-- Stats populated by JS -->
-            </div>
-
-            <!-- User Repos -->
+            <!-- User Repos (Pinned to Bottom) -->
             <div id="reposSection" class="repos-section hidden">
                 <h4 data-i18n="yourRepos">Your Repos</h4>
                 <div id="reposList" class="repos-list">
@@ -96,30 +95,39 @@
             <div class="sidebar-footer">
                 <!-- Settings Popover -->
                 <div id="settingsMenu" class="settings-menu">
-                    <div class="menu-item" id="loginMenuItem">
-                        <i class='bx bxl-github'></i> <span data-i18n="loginGithub">Login with GitHub</span>
+                    <div class="settings-profile-header">
+                        <span id="settingsUserEmail" class="user-email">guest@repojudge.ai</span>
                     </div>
-                    <div class="menu-item hidden" id="profileMenuItem">
-                        <i class='bx bx-user'></i> <span data-i18n="profile">Profile</span>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" id="upgradePlanBtn">
+                        <i class='bx bx-crown'></i> <span data-i18n="upgradePlan">Planı yükselt</span>
+                    </div>
+                    <div class="menu-item" id="profileMenuItem">
+                        <i class='bx bx-user'></i> <span data-i18n="settings">Ayarlar</span>
+                        <span class="shortcut">⌘,</span>
                     </div>
                     <div class="menu-item" id="langToggleItem">
-                        <i class='bx bx-globe'></i> Language: <span id="currentLangDisplay">EN</span>
+                        <i class='bx bx-globe'></i> <span>Language:</span> <span id="currentLangDisplay"
+                            class="lang-val">EN</span>
                     </div>
-                    <div class="menu-divider hidden" id="authDivider"></div>
-                    <div class="menu-item danger hidden" id="logoutMenuItem">
-                        <i class='bx bx-log-out'></i> <span data-i18n="logout">Log out</span>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item danger" id="logoutMenuItem">
+                        <i class='bx bx-log-out'></i> <span data-i18n="logout">Oturumu Kapat</span>
+                    </div>
+                    <div class="menu-item" id="loginMenuItem">
+                        <i class='bx bxl-github'></i> <span data-i18n="loginGithub">Login with GitHub</span>
                     </div>
                 </div>
 
                 <!-- User/Settings Trigger -->
                 <button class="user-menu-btn" id="userMenuBtn">
                     <div class="user-avatar-container">
-                        <img id="userAvatar" src="" alt="User" class="avatar-img hidden">
-                        <div id="defaultAvatar" class="avatar-placeholder"><i class='bx bx-user'></i></div>
+                        <img id="sidebarUserAvatar" src="" alt="User" class="avatar-img hidden">
+                        <div id="sidebarDefaultAvatar" class="avatar-placeholder"><i class='bx bx-user'></i></div>
                     </div>
                     <div class="user-info">
-                        <span class="user-name" id="userName">Guest</span>
-                        <span class="user-plan" id="userPlan">Free Plan</span>
+                        <span class="user-name" id="sidebarUserName">Guest</span>
+                        <span class="user-plan" id="sidebarUserPlan">Free Plan</span>
                     </div>
                     <i class='bx bx-dots-horizontal-rounded menu-icon'></i>
                 </button>
@@ -179,7 +187,6 @@
                         <button class="tab active" data-tab="overview" data-i18n="overview">Overview</button>
                         <button class="tab" data-tab="issues" data-i18n="issues">Issues</button>
                         <button class="tab" data-tab="security" data-i18n="security">Security</button>
-                        <button class="tab" data-tab="chat">Chat 💬</button>
                         <button class="tab" data-tab="readme" data-i18n="readme">README</button>
                     </div>
 
@@ -286,20 +293,18 @@
                         <div id="securityList" class="issues-grid"></div>
                     </div>
 
-                    <!-- Chat Panel (NEW) -->
+                    <!-- Chat Panel -->
                     <div id="chat-panel" class="tab-panel">
                         <div class="chat-container">
-                            <div class="chat-messages" id="chatMessages">
-                                <div class="message system">
-                                    <div class="message-content">
-                                        Hello! I've analyzed this repository. Ask me anything about the code structure,
-                                        bugs, or how to improve it.
-                                    </div>
-                                </div>
+                            <div id="chatMessages" class="chat-messages-modern">
+                                <!-- Messages will appear here -->
                             </div>
-                            <div class="chat-input-area">
-                                <input type="text" id="chatInput" placeholder="Ask about the code...">
-                                <button id="sendChatBtn"><i class='bx bx-send'></i></button>
+                            <div class="chat-input-area-modern">
+                                <input type="text" id="chatInput" placeholder="Koda dair her şeyi sorabilirsin..."
+                                    autocomplete="off">
+                                <button id="sendChatBtn">
+                                    <i class='bx bxs-send'></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -348,6 +353,7 @@
         </div>
     </div>
 
+
     <!-- Scoring Info Modal -->
     <div id="scoringModal" class="modal hidden">
         <div class="modal-content scoring-info-modal">
@@ -384,7 +390,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="js/app.js?v=15"></script>
+    <script src="js/app.js?v=26"></script>
 </body>
 
 </html>

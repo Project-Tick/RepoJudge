@@ -2,6 +2,7 @@
 let selectedLang = localStorage.getItem('repojudge_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
 let currentAnalysis = null;
 let analysisHistory = [];
+let analysisFolders = JSON.parse(localStorage.getItem('analysisFolders')) || [];
 let currentFilter = 'all';
 
 // Translations
@@ -40,7 +41,10 @@ const translations = {
         getBadge: 'Get Badge',
         badgeTitle: 'Get Your Repository Badge',
         badgeDesc: 'Add this badge to your GitHub README.md to show off your code quality score!',
-        markdown: 'Markdown'
+        markdown: 'Markdown',
+        upgradePlan: 'Upgrade Plan',
+        settings: 'Settings',
+        aiChat: 'AI Chat'
     },
     tr: {
         title: 'Kodunuzu Analiz Edin',
@@ -75,7 +79,10 @@ const translations = {
         getBadge: 'Rozet Al',
         badgeTitle: 'Repo Rozetini Al',
         badgeDesc: 'Kod kalitesi puanınızı göstermek için bu rozeti GitHub README.md dosyanıza ekleyin!',
-        markdown: 'Markdown'
+        markdown: 'Markdown',
+        upgradePlan: 'Planı Yükselt',
+        settings: 'Ayarlar',
+        aiChat: 'AI Sohbeti'
     }
 };
 
@@ -87,9 +94,11 @@ const repoUrlInput = document.getElementById('repoUrl');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const newAnalysisBtn = document.getElementById('newAnalysisBtn');
 const historyList = document.getElementById('historyList');
-const sidebarStats = document.getElementById('sidebarStats');
 const userSection = document.getElementById('userSection');
-const reposSection = document.getElementById('reposSection'); // Should exist if we add repos listing later
+const reposSection = document.getElementById('reposSection');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChatBtn');
 
 
 // Initialize
@@ -116,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('App Initializing...');
     loadHistory();
     setupEventListeners();
+    setupFolderListeners();
     updateUI();
 
     // Check auth last
@@ -140,73 +150,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Check authentication status
 async function checkAuth() {
+    console.log('[Auth] Fetching user status...');
     try {
         const res = await fetch('/auth/user');
         const data = await res.json();
+        console.log('[Auth] Response:', data);
 
-        // Safe DOM Element Getter
-        const getEl = (id) => document.getElementById(id);
+        const avatarImg = document.getElementById('sidebarUserAvatar');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        const nameEl = document.getElementById('sidebarUserName');
+        const planEl = document.getElementById('sidebarUserPlan');
+        const settingsEmailEl = document.getElementById('settingsUserEmail');
 
-        const els = {
-            userAvatar: getEl('userAvatar'),
-            defaultAvatar: getEl('defaultAvatar'),
-            userName: getEl('userName'),
-            userPlan: getEl('userPlan'),
-            loginItem: getEl('loginMenuItem'),
-            profileItem: getEl('profileMenuItem'),
-            authDivider: getEl('authDivider'),
-            logoutItem: getEl('logoutMenuItem'),
-            reposSection: getEl('reposSection')
-        };
-
-        const setClass = (el, type, className = 'hidden') => {
-            if (el) el.classList[type](className);
-        };
+        const loginItem = document.getElementById('loginMenuItem');
+        const profileItem = document.getElementById('profileMenuItem');
+        const logoutItem = document.getElementById('logoutMenuItem');
+        const upgradeBtn = document.getElementById('upgradePlanBtn');
+        const reposSection = document.getElementById('reposSection');
 
         if (data.authenticated && data.user) {
-            console.log('User authenticated:', data.user.login);
+            console.log('[Auth] SUCCESS: Logged in as', data.user.login);
 
-            // User Data
-            if (els.userAvatar) {
-                els.userAvatar.src = data.user.avatar || '';
-                setClass(els.userAvatar, 'remove');
+            // 1. Update Profile Information
+            if (nameEl) nameEl.textContent = data.user.name || data.user.login || 'User';
+            if (planEl) planEl.textContent = 'Pro Plan';
+            if (settingsEmailEl) settingsEmailEl.textContent = data.user.email || `${data.user.login}@github.com`;
+
+            if (avatarImg) {
+                avatarImg.src = data.user.avatar || '';
+                avatarImg.classList.remove('hidden');
             }
-            setClass(els.defaultAvatar, 'add');
+            if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
 
-            if (els.userName) els.userName.textContent = data.user.name || data.user.login || 'User';
-            if (els.userPlan) els.userPlan.textContent = 'Pro Plan';
+            // 2. Update Menu Items
+            if (loginItem) loginItem.classList.add('hidden');
+            if (profileItem) profileItem.classList.remove('hidden');
+            if (logoutItem) logoutItem.classList.remove('hidden');
+            if (upgradeBtn) upgradeBtn.classList.remove('hidden');
 
-            // Menu State
-            setClass(els.loginItem, 'add');
-            setClass(els.profileItem, 'remove');
-            setClass(els.authDivider, 'remove');
-            setClass(els.logoutItem, 'remove');
-
-            // Repos
-            if (els.reposSection) {
-                setClass(els.reposSection, 'remove');
+            // 3. Show and Load Repos
+            if (reposSection) {
+                reposSection.classList.remove('hidden');
                 loadUserRepos();
             }
         } else {
-            console.log('User not authenticated');
+            console.log('[Auth] GUEST: No active session.');
 
-            // Guest Data
-            setClass(els.userAvatar, 'add');
-            setClass(els.defaultAvatar, 'remove');
+            if (nameEl) nameEl.textContent = 'Guest';
+            if (planEl) planEl.textContent = 'Free Plan';
+            if (settingsEmailEl) settingsEmailEl.textContent = 'guest@repojudge.ai';
 
-            if (els.userName) els.userName.textContent = 'Guest';
-            if (els.userPlan) els.userPlan.textContent = 'Free Plan';
+            if (avatarImg) avatarImg.classList.add('hidden');
+            if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
 
-            // Menu State
-            setClass(els.loginItem, 'remove');
-            setClass(els.profileItem, 'add');
-            setClass(els.authDivider, 'add');
-            setClass(els.logoutItem, 'add');
+            if (loginItem) loginItem.classList.remove('hidden');
+            if (profileItem) profileItem.classList.add('hidden');
+            if (logoutItem) logoutItem.classList.add('hidden');
+            if (upgradeBtn) upgradeBtn.classList.add('hidden');
 
-            setClass(els.reposSection, 'add');
+            if (reposSection) reposSection.classList.add('hidden');
         }
     } catch (err) {
-        console.error('Auth check failed:', err);
+        console.error('[Auth] Critical Error:', err);
     }
 }
 
@@ -238,13 +243,24 @@ async function loadUserRepos() {
         // Menu trigger click
         reposList.querySelectorAll('.repo-menu-trigger').forEach(trigger => {
             trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevents repo-item click
                 const index = trigger.dataset.index;
                 const dropdown = reposList.querySelector(`.repo-menu[data-index="${index}"]`);
 
                 // Close all other dropdowns
-                reposList.querySelectorAll('.repo-menu').forEach(d => d.classList.remove('active'));
+                document.querySelectorAll('.repo-menu.active').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('active');
+                });
+
                 dropdown.classList.toggle('active');
+            });
+        });
+
+        // Entire repo item click (except menu trigger)
+        reposList.querySelectorAll('.repo-item').forEach(item => {
+            item.addEventListener('click', () => {
+                repoUrlInput.value = item.dataset.url;
+                startAnalysis();
             });
         });
 
@@ -269,9 +285,12 @@ async function loadUserRepos() {
         });
 
         // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-            reposList.querySelectorAll('.repo-menu').forEach(d => d.classList.remove('active'));
-        });
+        if (!window.repoMenuListenerAdded) {
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.repo-menu.active').forEach(d => d.classList.remove('active'));
+            });
+            window.repoMenuListenerAdded = true;
+        }
     } catch (err) {
         console.error('Failed to load repos:', err);
     }
@@ -329,7 +348,14 @@ function setupEventListeners() {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById(`${tab.dataset.tab}-panel`).classList.add('active');
+            const panelId = `${tab.dataset.tab}-panel`;
+            const panel = document.getElementById(panelId);
+            if (panel) panel.classList.add('active');
+
+            // If chat tab, load history
+            if (tab.dataset.tab === 'chat') {
+                if (typeof loadChatHistory === 'function') loadChatHistory();
+            }
         });
     });
 
@@ -385,65 +411,78 @@ function setupEventListeners() {
         }
     });
 
-    setupChat();
+    setupIntegratedChat();
     setupBadge();
     setupScoringInfo();
 }
 
 // Chat Logic
-function setupChat() {
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendChatBtn');
-    const messages = document.getElementById('chatMessages');
-    let history = [];
-
+// Integrated AI Chat Logic
+function setupIntegratedChat() {
     async function send() {
         const text = chatInput.value.trim();
         if (!text) return;
 
+        if (!currentAnalysis) {
+            addChatMessage('Lütfen önce bir repository analiz edin.', 'system');
+            return;
+        }
+
+        console.log('[Chat] Sending message:', text, 'Repo:', currentAnalysis.url);
+
         // Add user message
-        addMessage(text, 'user');
+        addChatMessage(text, 'user');
         chatInput.value = '';
 
+        // Initialize chatHistory if it doesn't exist
+        if (!currentAnalysis.chatHistory) currentAnalysis.chatHistory = [];
+        currentAnalysis.chatHistory.push({ role: 'user', content: text });
+        saveHistory();
+
         // Show loading state
-        const loadingId = addMessage('...', 'model');
+        const loadingId = addChatMessage('...', 'model');
 
         try {
             const res = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    repoUrl: currentAnalysis.repoUrl,
+                    repoUrl: currentAnalysis.url,
                     message: text,
-                    history: history,
+                    history: currentAnalysis.chatHistory.slice(0, -1), // Send history before this message
                     language: selectedLang,
                     model: document.getElementById('modelSelect')?.value || 'flash'
                 })
             });
             const data = await res.json();
+            console.log('[Chat] Response:', data);
 
-            // Remove loading, add response
-            document.getElementById(loadingId).remove();
+            // Remove loading
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
 
             if (data.success) {
-                addMessage(data.response, 'model');
-                history.push({ role: 'user', content: text });
-                history.push({ role: 'model', content: data.response });
+                addChatMessage(data.response, 'model');
+                currentAnalysis.chatHistory.push({ role: 'model', content: data.response });
+                saveHistory();
             } else {
-                addMessage('Error: ' + data.error, 'system');
+                console.error('[Chat] Server Error:', data.error);
+                addChatMessage('Hata: ' + data.error, 'system');
             }
         } catch (e) {
-            document.getElementById(loadingId)?.remove();
-            addMessage('Failed to send message.', 'system');
+            console.error('[Chat] Fetch Error:', e);
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+            addChatMessage('Mesaj gönderilemedi: ' + e.message, 'system');
         }
     }
 
-    sendBtn?.addEventListener('click', send);
+    sendChatBtn?.addEventListener('click', send);
     chatInput?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') send();
     });
 
-    function addMessage(text, role) {
+    window.addChatMessage = function (text, role) {
         const id = 'msg-' + Date.now();
         const div = document.createElement('div');
         div.className = `message ${role}`;
@@ -453,10 +492,40 @@ function setupChat() {
         const content = role === 'model' ? (typeof marked !== 'undefined' ? marked.parse(text) : text) : text;
 
         div.innerHTML = `<div class="message-content">${content}</div>`;
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
         return id;
-    }
+    };
+
+    // Load history for current analysis
+    window.loadChatHistory = function () {
+        chatMessages.innerHTML = '';
+        if (currentAnalysis && currentAnalysis.chatHistory) {
+            currentAnalysis.chatHistory.forEach(msg => {
+                addChatMessage(msg.content, msg.role);
+            });
+        } else {
+            addChatMessage('Bu analiz için sohbet başlatın...', 'system');
+        }
+    };
+
+    // Expose a way to open chat with a prompt
+    window.openAIChat = function (prompt) {
+        // Manually switch to chat panel
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        const chatPanel = document.getElementById('chat-panel');
+        if (chatPanel) {
+            chatPanel.classList.add('active');
+            if (typeof loadChatHistory === 'function') loadChatHistory();
+        }
+
+        if (prompt) {
+            chatInput.value = prompt;
+            chatInput.focus();
+        }
+    };
 }
 
 // Badge Logic
@@ -592,7 +661,6 @@ function showWelcomeScreen() {
     welcomeScreen.classList.remove('hidden');
     loadingScreen.classList.add('hidden');
     analysisView.classList.add('hidden');
-    sidebarStats.innerHTML = '';
     repoUrlInput.value = '';
 }
 
@@ -692,21 +760,8 @@ function renderAnalysis() {
     document.getElementById('readmePreview').innerHTML = marked.parse(cleanReadme);
     document.getElementById('readmeSource').textContent = cleanReadme;
 
-    // Sidebar stats
-    sidebarStats.innerHTML = `
-        <div class="stat-row">
-            <span class="stat-label">Health</span>
-            <span class="stat-value" style="color: ${scoreColor}">${score}/100</span>
-        </div>
-        <div class="stat-row">
-            <span class="stat-label">Critical</span>
-            <span class="stat-value" style="color: var(--danger)">${criticalCount}</span>
-        </div>
-        <div class="stat-row">
-            <span class="stat-label">Security</span>
-            <span class="stat-value" style="color: var(--warning)">${securityCount}</span>
-        </div>
-    `;
+    // Load chat history for this analysis
+    if (typeof loadChatHistory === 'function') loadChatHistory();
 }
 
 function renderIssues() {
@@ -859,160 +914,183 @@ function saveToHistory(analysis) {
     renderHistory();
 }
 
+function setupFolderListeners() {
+    const newFolderBtn = document.getElementById('newFolderBtn');
+    newFolderBtn?.addEventListener('click', () => {
+        const name = prompt('Folder Name:');
+        if (name) {
+            const folder = {
+                id: 'folder-' + Date.now(),
+                name: name,
+                items: [],
+                collapsed: false
+            };
+            analysisFolders.push(folder);
+            saveFolders();
+            renderHistory();
+        }
+    });
+
+    // Delegated listener for folder toggle
+    document.getElementById('historyList').addEventListener('click', (e) => {
+        const header = e.target.closest('.folder-header');
+        if (header) {
+            const folderId = header.parentElement.dataset.id;
+            const folder = analysisFolders.find(f => f.id === folderId);
+            if (folder) {
+                folder.collapsed = !folder.collapsed;
+                saveFolders();
+                renderHistory();
+            }
+        }
+    });
+}
+
+function saveFolders() {
+    localStorage.setItem('analysisFolders', JSON.stringify(analysisFolders));
+}
+
 function renderHistory() {
-    if (analysisHistory.length === 0) {
+    if (analysisHistory.length === 0 && analysisFolders.length === 0) {
         historyList.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">${translations[selectedLang].noHistory}</p>`;
         return;
     }
 
-    historyList.innerHTML = analysisHistory.map((a, i) => `
-        <div class="history-item ${currentAnalysis?.url === a.url ? 'active' : ''}" data-index="${i}" data-url="${a.url}">
-            <i class='bx bxl-github'></i>
-            <span>${a.repoName}</span>
-            <i class='bx bx-dots-vertical-rounded menu-trigger' data-index="${i}"></i>
-            <div class="menu-dropdown" data-index="${i}">
-                <div class="menu-item" data-action="reanalyze"><i class='bx bx-refresh'></i> Yeniden Analiz</div>
-                <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
-                <div class="menu-item danger" data-action="delete"><i class='bx bx-trash'></i> Sil</div>
+    // Separate items that are in folders vs root
+    const itemsInFolders = new Set();
+    analysisFolders.forEach(f => f.items.forEach(url => itemsInFolders.add(url)));
+    const rootItems = analysisHistory.filter(a => !itemsInFolders.has(a.url));
+
+    let html = '';
+
+    // 1. Render Folders
+    analysisFolders.forEach(folder => {
+        const folderItems = analysisHistory.filter(a => folder.items.includes(a.url));
+        html += `
+            <div class="history-folder ${folder.collapsed ? 'collapsed' : ''}" data-id="${folder.id}">
+                <div class="folder-header">
+                    <i class='bx bx-chevron-down arrow'></i>
+                    <i class='bx bx-folder'></i>
+                    <span>${folder.name}</span>
+                </div>
+                <div class="folder-content">
+                    ${folderItems.length ? folderItems.map(a => renderHistoryItem(a)).join('') : '<div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted)">Klasöre sürükleyin</div>'}
+                </div>
+            </div>
+        `;
+    });
+
+    // 2. Render Root Items
+    html += rootItems.map(a => renderHistoryItem(a)).join('');
+
+    historyList.innerHTML = html;
+
+    // Re-attach listeners for all items
+    setupHistoryItemListeners();
+}
+
+function renderHistoryItem(a) {
+    const index = analysisHistory.findIndex(item => item.url === a.url);
+    const active = currentAnalysis?.url === a.url ? 'active' : '';
+    return `
+        <div class="history-group">
+            <div class="history-item ${active}" data-index="${index}" data-url="${a.url}">
+                <i class='bx bxl-github'></i>
+                <span>${a.repoName}</span>
+                <i class='bx bx-dots-vertical-rounded menu-trigger' data-index="${index}"></i>
+                <div class="menu-dropdown" data-index="${index}">
+                    <div class="menu-item" data-action="reanalyze"><i class='bx bx-refresh'></i> Yeniden Analiz</div>
+                    <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" data-action="move-to-folder"><i class='bx bx-folder-plus'></i> Klasöre Taşı...</div>
+                    <div class="menu-item danger" data-action="delete"><i class='bx bx-trash'></i> Sil</div>
+                </div>
+            </div>
+            <div class="history-sub-item" data-index="${index}" data-action="chat">
+                <i class='bx bx-subdirectory-right'></i>
+                <span>${translations[selectedLang].aiChat || 'AI Sohbeti'}</span>
             </div>
         </div>
-    `).join('');
+    `;
+}
 
-    // Click on item to view analysis
+function setupHistoryItemListeners() {
     historyList.querySelectorAll('.history-item').forEach(item => {
         item.addEventListener('click', (e) => {
-            // Don't trigger if clicking on menu
             if (e.target.closest('.menu-trigger') || e.target.closest('.menu-dropdown')) return;
-
             const index = parseInt(item.dataset.index);
             currentAnalysis = analysisHistory[index];
             renderAnalysis();
             showAnalysisView();
             renderHistory();
+
+            // Default to overview tab
+            const overviewTab = document.querySelector('.tab[data-tab="overview"]');
+            if (overviewTab) overviewTab.click();
         });
     });
 
-    // Menu trigger click
+    historyList.querySelectorAll('.history-sub-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const index = parseInt(item.dataset.index);
+            currentAnalysis = analysisHistory[index];
+            renderAnalysis();
+            showAnalysisView();
+            window.openAIChat();
+        });
+    });
+
     historyList.querySelectorAll('.menu-trigger').forEach(trigger => {
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             const index = trigger.dataset.index;
             const dropdown = historyList.querySelector(`.menu-dropdown[data-index="${index}"]`);
-
-            // Close all other dropdowns
-            historyList.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
+            document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
             dropdown.classList.toggle('active');
         });
     });
 
-    // Menu item actions
     historyList.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', (e) => {
             e.stopPropagation();
-            const dropdown = item.closest('.menu-dropdown');
-            const index = parseInt(dropdown.dataset.index);
             const action = item.dataset.action;
+            const index = parseInt(item.closest('.menu-dropdown').dataset.index);
             const entry = analysisHistory[index];
 
-            dropdown.classList.remove('active');
-
-            if (action === 'delete') {
+            if (action === 'chat') {
+                currentAnalysis = entry;
+                renderAnalysis();
+                showAnalysisView();
+                window.openAIChat();
+            } else if (action === 'delete') {
                 analysisHistory.splice(index, 1);
-                localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+                // Also remove from folders
+                analysisFolders.forEach(f => f.items = f.items.filter(url => url !== entry.url));
+                saveHistory();
+                saveFolders();
                 renderHistory();
             } else if (action === 'reanalyze') {
                 repoUrlInput.value = entry.url;
                 startAnalysis({ forceRefresh: true });
             } else if (action === 'github') {
                 window.open(entry.url, '_blank');
+            } else if (action === 'move-to-folder') {
+                const folderId = prompt('Kayıtlı Klasörler:\n' + analysisFolders.map(f => `- ${f.name} (id: ${f.id})`).join('\n') + '\n\nKlasör ID girin:');
+                const folder = analysisFolders.find(f => f.id === folderId);
+                if (folder) {
+                    // Remove from other folders first
+                    analysisFolders.forEach(f => f.items = f.items.filter(url => url !== entry.url));
+                    folder.items.push(entry.url);
+                    saveFolders();
+                    renderHistory();
+                }
             }
+            item.closest('.menu-dropdown').classList.remove('active');
         });
     });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
-        historyList.querySelectorAll('.menu-dropdown').forEach(d => d.classList.remove('active'));
-    });
-}
-// Auth & User Management
-async function checkAuth() {
-    try {
-        const res = await fetch('/auth/user');
-        const data = await res.json();
-
-        if (data.authenticated) {
-            renderUser(data.user);
-            if (reposSection) {
-                reposSection.classList.remove('hidden');
-                loadUserRepos();
-            }
-        } else {
-            renderLoginButton();
-        }
-    } catch (err) {
-        console.error('Auth check failed:', err);
-        renderLoginButton();
-    }
 }
 
-function renderUser(user) {
-    if (!userSection) return;
-
-    userSection.innerHTML = `
-        <div class="user-info">
-            <img src="${user.avatar}" alt="${user.login}" class="user-avatar">
-            <div class="user-details" style="flex:1; overflow:hidden;">
-                <div class="user-name" title="${user.name || user.login}">${user.name || user.login}</div>
-                <div style="font-size: 0.75rem; color: var(--text-secondary);">@${user.login}</div>
-            </div>
-            <a href="/auth/logout" class="logout-btn" title="Logout">
-                <i class='bx bx-log-out'></i>
-            </a>
-        </div>
-    `;
+function saveHistory() {
+    localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
 }
 
-function renderLoginButton() {
-    if (!userSection) return;
-
-    userSection.innerHTML = `
-        <a href="/auth/github" class="github-login-btn">
-            <i class='bx bxl-github'></i>
-            <span>${translations[selectedLang].loginGithub}</span>
-        </a>
-    `;
-}
-
-// Load user's GitHub repositories
-async function loadUserRepos() {
-    try {
-        const res = await fetch('/auth/repos');
-        const data = await res.json();
-        const reposList = document.querySelector('.repos-list');
-
-        if (!reposList) return;
-
-        if (data.repos.length === 0) {
-            reposList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No repos found</p>';
-            return;
-        }
-
-        reposList.innerHTML = data.repos.map(repo => `
-            <div class="repo-item" data-url="https://github.com/${repo.full_name}">
-                <i class='bx ${repo.private ? 'bx-lock-alt' : 'bx-git-repo-forked'}'></i>
-                <span>${repo.name}</span>
-                ${repo.private ? '<span class="private-badge">Private</span>' : ''}
-            </div>
-        `).join('');
-
-        // Add click handlers
-        reposList.querySelectorAll('.repo-item').forEach(item => {
-            item.addEventListener('click', () => {
-                repoUrlInput.value = item.dataset.url;
-                startAnalysis();
-            });
-        });
-    } catch (err) {
-        console.error('Failed to load repos:', err);
-    }
-}
