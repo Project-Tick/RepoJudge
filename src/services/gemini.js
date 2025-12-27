@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const CLIENTS = new Map();
 
 const MODELS = {
     flash: "gemini-2.0-flash-exp",
@@ -16,15 +16,29 @@ const GENERATION_CONFIG = {
     maxOutputTokens: 8192,
 };
 
-function getModel(type = 'flash') {
+function getGenAI(apiKey) {
+    const key = apiKey || process.env.GEMINI_API_KEY;
+    if (!key) {
+        throw new Error('Missing Gemini API key.');
+    }
+
+    if (!CLIENTS.has(key)) {
+        CLIENTS.set(key, new GoogleGenerativeAI(key));
+    }
+
+    return CLIENTS.get(key);
+}
+
+function getModel(type = 'flash', apiKey) {
     const modelName = MODELS[type] || MODELS.flash;
+    const genAI = getGenAI(apiKey);
     return genAI.getGenerativeModel({
         model: modelName,
         generationConfig: GENERATION_CONFIG
     });
 }
 
-async function generateReadme(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash') {
+async function generateReadme(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash', apiKey) {
     const langInstruction = language === 'tr'
         ? 'ÖNEMLİ: HER ŞEYİ TÜRKÇE YAZ. Tüm metin, açıklamalar ve başlıklar Türkçe olmalı.'
         : 'IMPORTANT: Write EVERYTHING in English.';
@@ -106,7 +120,7 @@ async function generateReadme(repoName, fileStructure, fileContents, language = 
     `;
 
     try {
-        const model = getModel(modelType);
+        const model = getModel(modelType, apiKey);
         const result = await model.generateContent(prompt);
         return result.response.text();
     } catch (error) {
@@ -115,7 +129,7 @@ async function generateReadme(repoName, fileStructure, fileContents, language = 
     }
 }
 
-async function analyzeRepo(repoName, fileStructure, fileContents, modelType = 'flash') {
+async function analyzeRepo(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash', apiKey) {
     const prompt = `
     Sen DENEYİMLİ BİR SENİOR SOFTWARE ENGINEER, GÜVENLİK UZMANI ve ÜRÜN STRATEJİSTİSİN. Kod incelemesi yapıyorsun.
     
@@ -368,7 +382,7 @@ async function analyzeRepo(repoName, fileStructure, fileContents, modelType = 'f
     `;
 
     try {
-        const model = getModel(modelType);
+        const model = getModel(modelType, apiKey);
         const result = await model.generateContent(prompt);
         const text = result.response.text();
         const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -392,7 +406,7 @@ async function analyzeRepo(repoName, fileStructure, fileContents, modelType = 'f
     }
 }
 
-async function chatWithRepo(repoName, fileStructure, fileContents, chatHistory, userMessage, language = 'en', modelType = 'flash') {
+async function chatWithRepo(repoName, fileStructure, fileContents, chatHistory, userMessage, language = 'en', modelType = 'flash', apiKey) {
     const langInstruction = language === 'tr'
         ? 'Türkçe cevap ver.'
         : 'Answer in English.';
@@ -428,7 +442,7 @@ async function chatWithRepo(repoName, fileStructure, fileContents, chatHistory, 
     `;
 
     try {
-        const model = getModel(modelType);
+        const model = getModel(modelType, apiKey);
         const chat = model.startChat({
             history: [
                 {

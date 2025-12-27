@@ -5,6 +5,60 @@ let analysisHistory = [];
 let analysisFolders = JSON.parse(localStorage.getItem('analysisFolders')) || [];
 let currentFilter = 'all';
 
+const STORAGE_KEYS = {
+    apiBase: 'repojudge_api_base',
+    githubToken: 'repojudge_github_token',
+    geminiKey: 'repojudge_gemini_key'
+};
+
+function getStoredValue(key) {
+    return (localStorage.getItem(key) || '').trim();
+}
+
+function getApiBase() {
+    return getStoredValue(STORAGE_KEYS.apiBase);
+}
+
+function getGithubToken() {
+    return getStoredValue(STORAGE_KEYS.githubToken);
+}
+
+function getGeminiKey() {
+    return getStoredValue(STORAGE_KEYS.geminiKey);
+}
+
+function buildApiUrl(path) {
+    const base = getApiBase();
+    if (!base) return path;
+    const normalized = base.replace(/\/+$/, '');
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return `${normalized}${suffix}`;
+}
+
+function buildHeaders(extra = {}) {
+    const headers = { ...extra };
+    const githubToken = getGithubToken();
+    const geminiKey = getGeminiKey();
+
+    if (githubToken) headers['x-github-token'] = githubToken;
+    if (geminiKey) headers['x-gemini-key'] = geminiKey;
+
+    return headers;
+}
+
+function isGithubPagesHost() {
+    return window.location.hostname.endsWith('github.io');
+}
+
+function ensureBackendConfigured() {
+    if (getApiBase()) return true;
+    if (isGithubPagesHost()) {
+        alert('Please set the Backend URL in API Settings.');
+        return false;
+    }
+    return true;
+}
+
 // Translations
 const translations = {
     en: {
@@ -126,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHistory();
     setupEventListeners();
     setupFolderListeners();
+    setupApiSettingsModal();
     updateUI();
 
     // Check auth last
@@ -151,29 +206,31 @@ document.addEventListener('DOMContentLoaded', () => {
 // Check authentication status
 async function checkAuth() {
     console.log('[Auth] Fetching user status...');
+    const avatarImg = document.getElementById('sidebarUserAvatar');
+    const avatarPlaceholder = document.getElementById('sidebarDefaultAvatar');
+    const nameEl = document.getElementById('sidebarUserName');
+    const planEl = document.getElementById('sidebarUserPlan');
+    const settingsEmailEl = document.getElementById('settingsUserEmail');
+
+    const loginItem = document.getElementById('loginMenuItem');
+    const profileItem = document.getElementById('profileMenuItem');
+    const logoutItem = document.getElementById('logoutMenuItem');
+    const upgradeBtn = document.getElementById('upgradePlanBtn');
+    const reposSection = document.getElementById('reposSection');
+    const isGhPages = isGithubPagesHost();
+
     try {
-        const res = await fetch('/auth/user');
-        const data = await res.json();
+        const res = await fetch(buildApiUrl('/api/user'), { headers: buildHeaders() });
+        const data = res.ok ? await res.json() : { authenticated: false };
         console.log('[Auth] Response:', data);
-
-        const avatarImg = document.getElementById('sidebarUserAvatar');
-        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-        const nameEl = document.getElementById('sidebarUserName');
-        const planEl = document.getElementById('sidebarUserPlan');
-        const settingsEmailEl = document.getElementById('settingsUserEmail');
-
-        const loginItem = document.getElementById('loginMenuItem');
-        const profileItem = document.getElementById('profileMenuItem');
-        const logoutItem = document.getElementById('logoutMenuItem');
-        const upgradeBtn = document.getElementById('upgradePlanBtn');
-        const reposSection = document.getElementById('reposSection');
+        const hasToken = Boolean(getGithubToken());
 
         if (data.authenticated && data.user) {
             console.log('[Auth] SUCCESS: Logged in as', data.user.login);
 
             // 1. Update Profile Information
             if (nameEl) nameEl.textContent = data.user.name || data.user.login || 'User';
-            if (planEl) planEl.textContent = 'Pro Plan';
+            if (planEl) planEl.textContent = hasToken ? 'Token Mode' : 'Pro Plan';
             if (settingsEmailEl) settingsEmailEl.textContent = data.user.email || `${data.user.login}@github.com`;
 
             if (avatarImg) {
@@ -196,101 +253,121 @@ async function checkAuth() {
         } else {
             console.log('[Auth] GUEST: No active session.');
 
-            if (nameEl) nameEl.textContent = 'Guest';
-            if (planEl) planEl.textContent = 'Free Plan';
-            if (settingsEmailEl) settingsEmailEl.textContent = 'guest@repojudge.ai';
+            if (nameEl) nameEl.textContent = hasToken ? 'Token Mode' : 'Guest';
+            if (planEl) planEl.textContent = hasToken ? 'Waiting for token' : 'Free Plan';
+            if (settingsEmailEl) settingsEmailEl.textContent = hasToken ? 'token@repojudge.ai' : 'guest@repojudge.ai';
 
             if (avatarImg) avatarImg.classList.add('hidden');
             if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
 
-            if (loginItem) loginItem.classList.remove('hidden');
+            if (loginItem) loginItem.classList.toggle('hidden', hasToken || isGhPages);
             if (profileItem) profileItem.classList.add('hidden');
             if (logoutItem) logoutItem.classList.add('hidden');
             if (upgradeBtn) upgradeBtn.classList.add('hidden');
 
-            if (reposSection) reposSection.classList.add('hidden');
+            if (reposSection) reposSection.classList.toggle('hidden', true);
         }
     } catch (err) {
         console.error('[Auth] Critical Error:', err);
+        const hasToken = Boolean(getGithubToken());
+
+        if (nameEl) nameEl.textContent = hasToken ? 'Token Mode' : 'Guest';
+        if (planEl) planEl.textContent = hasToken ? 'Waiting for token' : 'Free Plan';
+        if (settingsEmailEl) settingsEmailEl.textContent = hasToken ? 'token@repojudge.ai' : 'guest@repojudge.ai';
+
+        if (avatarImg) avatarImg.classList.add('hidden');
+        if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
+
+        if (loginItem) loginItem.classList.toggle('hidden', hasToken || isGhPages);
+        if (profileItem) profileItem.classList.add('hidden');
+        if (logoutItem) logoutItem.classList.add('hidden');
+        if (upgradeBtn) upgradeBtn.classList.add('hidden');
+
+        if (reposSection) reposSection.classList.add('hidden');
+    }
+}
+
+function renderReposList(repos) {
+    const reposList = document.getElementById('reposList');
+    if (!reposList) return;
+
+    if (!repos || repos.length === 0) {
+        reposList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No repos found</p>';
+        return;
+    }
+
+    reposList.innerHTML = repos.map((repo, i) => `
+        <div class="repo-item" data-url="https://github.com/${repo.full_name}" data-index="${i}">
+            <i class='bx ${repo.private ? 'bx-lock-alt' : 'bx-git-repo-forked'}'></i>
+            <span>${repo.name}</span>
+            ${repo.private ? '<span class="private-badge">Private</span>' : ''}
+            <i class='bx bx-dots-vertical-rounded repo-menu-trigger' data-index="${i}"></i>
+            <div class="menu-dropdown repo-menu" data-index="${i}">
+                <div class="menu-item" data-action="analyze"><i class='bx bx-analyse'></i> Analiz Et</div>
+                <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Menu trigger click
+    reposList.querySelectorAll('.repo-menu-trigger').forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const index = trigger.dataset.index;
+            const dropdown = reposList.querySelector(`.repo-menu[data-index="${index}"]`);
+
+            // Close all other dropdowns
+            document.querySelectorAll('.repo-menu.active').forEach(d => {
+                if (d !== dropdown) d.classList.remove('active');
+            });
+
+            dropdown.classList.toggle('active');
+        });
+    });
+
+    // Entire repo item click (except menu trigger)
+    reposList.querySelectorAll('.repo-item').forEach(item => {
+        item.addEventListener('click', () => {
+            repoUrlInput.value = item.dataset.url;
+            startAnalysis();
+        });
+    });
+
+    // Menu item actions
+    reposList.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = item.closest('.repo-menu');
+            const repoItem = item.closest('.repo-item');
+            const action = item.dataset.action;
+            const url = repoItem.dataset.url;
+
+            dropdown.classList.remove('active');
+
+            if (action === 'analyze') {
+                repoUrlInput.value = url;
+                startAnalysis();
+            } else if (action === 'github') {
+                window.open(url, '_blank');
+            }
+        });
+    });
+
+    // Close dropdown when clicking outside
+    if (!window.repoMenuListenerAdded) {
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.repo-menu.active').forEach(d => d.classList.remove('active'));
+        });
+        window.repoMenuListenerAdded = true;
     }
 }
 
 // Load user's GitHub repositories
 async function loadUserRepos() {
     try {
-        const res = await fetch('/auth/repos');
+        const res = await fetch(buildApiUrl('/api/repos'), { headers: buildHeaders() });
         const data = await res.json();
-        const reposList = document.getElementById('reposList');
-
-        if (data.repos.length === 0) {
-            reposList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No repos found</p>';
-            return;
-        }
-
-        reposList.innerHTML = data.repos.map((repo, i) => `
-            <div class="repo-item" data-url="https://github.com/${repo.full_name}" data-index="${i}">
-                <i class='bx ${repo.private ? 'bx-lock-alt' : 'bx-git-repo-forked'}'></i>
-                <span>${repo.name}</span>
-                ${repo.private ? '<span class="private-badge">Private</span>' : ''}
-                <i class='bx bx-dots-vertical-rounded repo-menu-trigger' data-index="${i}"></i>
-                <div class="menu-dropdown repo-menu" data-index="${i}">
-                    <div class="menu-item" data-action="analyze"><i class='bx bx-analyse'></i> Analiz Et</div>
-                    <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
-                </div>
-            </div>
-        `).join('');
-
-        // Menu trigger click
-        reposList.querySelectorAll('.repo-menu-trigger').forEach(trigger => {
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevents repo-item click
-                const index = trigger.dataset.index;
-                const dropdown = reposList.querySelector(`.repo-menu[data-index="${index}"]`);
-
-                // Close all other dropdowns
-                document.querySelectorAll('.repo-menu.active').forEach(d => {
-                    if (d !== dropdown) d.classList.remove('active');
-                });
-
-                dropdown.classList.toggle('active');
-            });
-        });
-
-        // Entire repo item click (except menu trigger)
-        reposList.querySelectorAll('.repo-item').forEach(item => {
-            item.addEventListener('click', () => {
-                repoUrlInput.value = item.dataset.url;
-                startAnalysis();
-            });
-        });
-
-        // Menu item actions
-        reposList.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dropdown = item.closest('.repo-menu');
-                const repoItem = item.closest('.repo-item');
-                const action = item.dataset.action;
-                const url = repoItem.dataset.url;
-
-                dropdown.classList.remove('active');
-
-                if (action === 'analyze') {
-                    repoUrlInput.value = url;
-                    startAnalysis();
-                } else if (action === 'github') {
-                    window.open(url, '_blank');
-                }
-            });
-        });
-
-        // Close dropdown when clicking outside
-        if (!window.repoMenuListenerAdded) {
-            document.addEventListener('click', () => {
-                document.querySelectorAll('.repo-menu.active').forEach(d => d.classList.remove('active'));
-            });
-            window.repoMenuListenerAdded = true;
-        }
+        renderReposList(data.repos);
     } catch (err) {
         console.error('Failed to load repos:', err);
     }
@@ -339,8 +416,12 @@ function setupEventListeners() {
     }
 
     // Login/Logout Actions
-    document.getElementById('loginMenuItem')?.addEventListener('click', () => window.location.href = '/auth/github');
-    document.getElementById('logoutMenuItem')?.addEventListener('click', () => window.location.href = '/auth/logout');
+    document.getElementById('loginMenuItem')?.addEventListener('click', () => {
+        window.location.href = buildApiUrl('/auth/github');
+    });
+    document.getElementById('logoutMenuItem')?.addEventListener('click', () => {
+        window.location.href = buildApiUrl('/auth/logout');
+    });
 
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -416,6 +497,71 @@ function setupEventListeners() {
     setupScoringInfo();
 }
 
+function setupApiSettingsModal() {
+    const modal = document.getElementById('apiSettingsModal');
+    const openBtn = document.getElementById('apiSettingsItem');
+    const closeBtn = modal?.querySelector('.close-modal');
+    const apiBaseInput = document.getElementById('apiBaseInput');
+    const githubTokenInput = document.getElementById('githubTokenInput');
+    const geminiKeyInput = document.getElementById('geminiKeyInput');
+    const saveBtn = document.getElementById('saveApiSettings');
+    const clearBtn = document.getElementById('clearApiSettings');
+
+    if (!modal || !openBtn) return;
+
+    function openModal() {
+        if (apiBaseInput) apiBaseInput.value = getApiBase();
+        if (githubTokenInput) githubTokenInput.value = getGithubToken();
+        if (geminiKeyInput) geminiKeyInput.value = getGeminiKey();
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    function saveSettings() {
+        const apiBase = apiBaseInput?.value.trim() || '';
+        const githubToken = githubTokenInput?.value.trim() || '';
+        const geminiKey = geminiKeyInput?.value.trim() || '';
+
+        if (apiBase) localStorage.setItem(STORAGE_KEYS.apiBase, apiBase);
+        else localStorage.removeItem(STORAGE_KEYS.apiBase);
+
+        if (githubToken) localStorage.setItem(STORAGE_KEYS.githubToken, githubToken);
+        else localStorage.removeItem(STORAGE_KEYS.githubToken);
+
+        if (geminiKey) localStorage.setItem(STORAGE_KEYS.geminiKey, geminiKey);
+        else localStorage.removeItem(STORAGE_KEYS.geminiKey);
+
+        closeModal();
+        checkAuth();
+        loadUserRepos();
+    }
+
+    function clearSettings() {
+        localStorage.removeItem(STORAGE_KEYS.apiBase);
+        localStorage.removeItem(STORAGE_KEYS.githubToken);
+        localStorage.removeItem(STORAGE_KEYS.geminiKey);
+
+        if (apiBaseInput) apiBaseInput.value = '';
+        if (githubTokenInput) githubTokenInput.value = '';
+        if (geminiKeyInput) geminiKeyInput.value = '';
+
+        closeModal();
+        checkAuth();
+        loadUserRepos();
+    }
+
+    openBtn.addEventListener('click', openModal);
+    saveBtn?.addEventListener('click', saveSettings);
+    clearBtn?.addEventListener('click', clearSettings);
+    closeBtn?.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
+
 // Chat Logic
 // Integrated AI Chat Logic
 function setupIntegratedChat() {
@@ -425,6 +571,10 @@ function setupIntegratedChat() {
 
         if (!currentAnalysis) {
             addChatMessage('Lütfen önce bir repository analiz edin.', 'system');
+            return;
+        }
+        if (!ensureBackendConfigured()) {
+            addChatMessage('API ayarlarından Backend URL belirleyin.', 'system');
             return;
         }
 
@@ -443,9 +593,9 @@ function setupIntegratedChat() {
         const loadingId = addChatMessage('...', 'model');
 
         try {
-            const res = await fetch('/api/chat', {
+            const res = await fetch(buildApiUrl('/api/chat'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: buildHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({
                     repoUrl: currentAnalysis.url,
                     message: text,
@@ -606,20 +756,21 @@ async function startAnalysis(options = {}) {
     const model = document.getElementById('modelSelect')?.value || 'flash';
 
     if (!url) return;
+    if (!ensureBackendConfigured()) return;
 
     showLoadingScreen();
 
     try {
         // Fetch both README and analysis
         const [readmeRes, analysisRes] = await Promise.all([
-            fetch('/api/generate', {
+            fetch(buildApiUrl('/api/generate'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: buildHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ repoUrl: url, language: selectedLang, forceRefresh, model })
             }),
-            fetch('/api/analyze', {
+            fetch(buildApiUrl('/api/analyze'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: buildHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ repoUrl: url, language: selectedLang, forceRefresh, model })
             })
         ]);
@@ -1093,4 +1244,3 @@ function setupHistoryItemListeners() {
 function saveHistory() {
     localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
 }
-

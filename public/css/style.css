@@ -1611,6 +1611,76 @@ body {
     line-height: 1.5;
 }
 
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.settings-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+}
+
+.settings-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2);
+}
+
+.settings-help {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.settings-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: var(--font-main);
+}
+
+.settings-btn.primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.settings-btn.primary:hover {
+    filter: brightness(1.05);
+}
+
+.settings-btn.ghost {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.settings-btn.ghost:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+}
+
 .badge-preview {
     display: flex;
     justify-content: center;

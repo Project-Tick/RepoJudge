@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
@@ -43,15 +44,20 @@ app.use(express.static('public'));
 // Auth routes
 app.use('/auth', authRoutes);
 
-// Helper to get auth token from session
-function getAuthToken(req) {
-    return req.session?.user?.accessToken || null;
+// Helper to get auth token from headers or session
+function getGithubToken(req) {
+    return req.headers['x-github-token'] || req.session?.user?.accessToken || null;
+}
+
+function getGeminiKey(req) {
+    return req.headers['x-gemini-key'] || null;
 }
 
 // API Routes
 app.post('/api/generate', async (req, res) => {
-    const { repoUrl, language, forceRefresh } = req.body;
-    const authToken = getAuthToken(req);
+    const { repoUrl, language, forceRefresh, model } = req.body;
+    const authToken = getGithubToken(req);
+    const geminiKey = getGeminiKey(req);
 
     if (!repoUrl) {
         return res.status(400).json({ error: 'Repository URL is required' });
@@ -93,7 +99,7 @@ app.post('/api/generate', async (req, res) => {
         const fileContents = await getFileContents(owner, repo, fileStructure, authToken);
 
         console.log(`Generating README via Gemini...`);
-        const readme = await generateReadme(repo, fileStructure, fileContents, language || 'en');
+        const readme = await generateReadme(repo, fileStructure, fileContents, language || 'en', model || 'flash', geminiKey);
 
         // Set Cache (Expire in 1 hour)
         await setCache(cacheKey, readme, 3600);
@@ -112,7 +118,8 @@ app.post('/api/generate', async (req, res) => {
 app.post('/api/analyze', async (req, res) => {
 
     const { repoUrl, language, forceRefresh, model } = req.body;
-    const authToken = getAuthToken(req);
+    const authToken = getGithubToken(req);
+    const geminiKey = getGeminiKey(req);
 
     if (!repoUrl) {
         return res.status(400).json({ error: 'GitHub repository URL is required' });
@@ -134,7 +141,7 @@ app.post('/api/analyze', async (req, res) => {
 
         const { fileStructure, fileContents } = await fetchRepoContent(owner, repo, authToken);
 
-        const analysis = await analyzeRepo(repo, fileStructure, fileContents, language || 'en', model);
+        const analysis = await analyzeRepo(repo, fileStructure, fileContents, language || 'en', model, geminiKey);
 
         // Set Cache
         await setCache(cacheKey, analysis, 3600);
@@ -148,7 +155,8 @@ app.post('/api/analyze', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
     const { repoUrl, message, history, language, model } = req.body;
-    const authToken = getAuthToken(req);
+    const authToken = getGithubToken(req);
+    const geminiKey = getGeminiKey(req);
 
     if (!repoUrl || !message) return res.status(400).json({ error: 'Missing repository URL or message' });
 
@@ -156,12 +164,68 @@ app.post('/api/chat', async (req, res) => {
         const { owner, repo } = parseGitHubUrl(repoUrl);
         const { fileStructure, fileContents } = await fetchRepoContent(owner, repo, authToken);
 
-        const response = await chatWithRepo(`${owner}/${repo}`, fileStructure, fileContents, history || [], message, language || 'en', model);
+        const response = await chatWithRepo(`${owner}/${repo}`, fileStructure, fileContents, history || [], message, language || 'en', model, geminiKey);
 
         res.json({ success: true, response });
     } catch (err) {
         console.error('Chat Error:', err);
         res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.get('/api/user', async (req, res) => {
+    const token = getGithubToken(req);
+    if (!token) return res.json({ authenticated: false });
+
+    try {
+        const response = await axios.get('https://api.github.com/user', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const user = response.data;
+        res.json({
+            authenticated: true,
+            user: {
+                login: user.login,
+                name: user.name,
+                avatar: user.avatar_url,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching user:', error.message);
+        res.status(401).json({ authenticated: false });
+    }
+});
+
+app.get('/api/repos', async (req, res) => {
+    const token = getGithubToken(req);
+    if (!token) return res.json({ repos: [] });
+
+    try {
+        const response = await axios.get('https://api.github.com/user/repos', {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+                sort: 'updated',
+                per_page: 20,
+                affiliation: 'owner'
+            }
+        });
+
+        const repos = response.data.map(repo => ({
+            name: repo.name,
+            full_name: repo.full_name,
+            private: repo.private,
+            url: repo.html_url,
+            description: repo.description,
+            language: repo.language,
+            updated_at: repo.updated_at
+        }));
+
+        res.json({ repos });
+    } catch (error) {
+        console.error('Error fetching repos:', error.message);
+        res.json({ repos: [] });
     }
 });
 

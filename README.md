@@ -77,6 +77,25 @@ GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
 SESSION_SECRET=your_random_session_secret
 ```
 
+### GitHub Pages (Frontend + Remote Backend)
+
+RepoJudge can run on GitHub Pages as a static frontend that talks to a separately hosted backend.
+
+1. Deploy the Node/Redis backend (same codebase).
+2. Build the static frontend:
+   ```bash
+   npm run build
+   # or
+   pnpm build
+   ```
+3. Configure GitHub Pages to serve the `/docs` folder.
+4. Open `dashboard.html` and set:
+   - Backend URL
+   - GitHub token
+   - Gemini API key
+
+Tokens are stored in localStorage on the client device.
+
 ## 🔧 GitHub OAuth Setup
 
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)

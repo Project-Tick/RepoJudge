@@ -57,7 +57,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="/" class="logo">
+                <a href="index.html" class="logo">
                     <i class='bx bx-code-block'></i>
                     <span>RepoJudge</span>
                 </a>
@@ -109,6 +109,9 @@
                     <div class="menu-item" id="langToggleItem">
                         <i class='bx bx-globe'></i> <span>Language:</span> <span id="currentLangDisplay"
                             class="lang-val">EN</span>
+                    </div>
+                    <div class="menu-item" id="apiSettingsItem">
+                        <i class='bx bx-key'></i> <span>API Settings</span>
                     </div>
                     <div class="menu-divider"></div>
                     <div class="menu-item danger" id="logoutMenuItem">
@@ -385,6 +388,39 @@
                 <h3>💡 Öneriler</h3>
                 <p>Öneriler, projenizde eksik olan best practice'lere göre otomatik oluşturulur: Test yoksa test
                     önerilir, CI/CD yoksa pipeline önerilir, vs.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Settings Modal -->
+    <div id="apiSettingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Settings</h3>
+                <button class="close-modal"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Set your backend URL and tokens. Values are stored in localStorage on this device.</p>
+                <div class="settings-form">
+                    <label class="settings-label" for="apiBaseInput">Backend URL</label>
+                    <input id="apiBaseInput" class="settings-input" type="url"
+                        placeholder="https://api.yourdomain.com">
+                    <span class="settings-help">Leave empty for same-origin backend.</span>
+
+                    <label class="settings-label" for="githubTokenInput">GitHub Token</label>
+                    <input id="githubTokenInput" class="settings-input" type="password" autocomplete="off"
+                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    <span class="settings-help">Required for private repos and user profile data.</span>
+
+                    <label class="settings-label" for="geminiKeyInput">Gemini API Key</label>
+                    <input id="geminiKeyInput" class="settings-input" type="password" autocomplete="off"
+                        placeholder="AIzaSyxxxxxxxxxxxxxxxxxxxx">
+                    <span class="settings-help">Used by the backend to call Gemini on your behalf.</span>
+                </div>
+                <div class="settings-actions">
+                    <button class="settings-btn ghost" id="clearApiSettings">Clear</button>
+                    <button class="settings-btn primary" id="saveApiSettings">Save</button>
+                </div>
             </div>
         </div>
     </div>
