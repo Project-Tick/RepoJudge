@@ -1,43 +1,52 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const CLIENTS = new Map();
-
 const MODELS = {
-    flash: "gemini-2.0-flash-exp",
-    pro: "gemini-1.5-pro"
+    flash: 'gemini-2.0-flash-exp',
+    pro: 'gemini-1.5-pro'
 };
 
-// Enhanced configuration for better AI responses
 const GENERATION_CONFIG = {
-    temperature: 0.9,  // More creative responses
+    temperature: 0.9,
     topP: 0.95,
     topK: 40,
-    maxOutputTokens: 8192,
+    maxOutputTokens: 8192
 };
 
-function getGenAI(apiKey) {
-    const key = apiKey;
-    if (!key) {
+function getModelName(type = 'flash') {
+    return MODELS[type] || MODELS.flash;
+}
+
+async function callGemini(apiKey, modelName, contents, generationConfig) {
+    if (!apiKey) {
         throw new Error('Missing Gemini API key.');
     }
 
-    if (!CLIENTS.has(key)) {
-        CLIENTS.set(key, new GoogleGenerativeAI(key));
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            contents,
+            generationConfig
+        })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        const message = data?.error?.message || 'Gemini request failed.';
+        throw new Error(message);
     }
 
-    return CLIENTS.get(key);
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const text = parts.map(part => part.text).join('').trim();
+    if (!text) {
+        throw new Error('Empty Gemini response.');
+    }
+
+    return text;
 }
 
-function getModel(type = 'flash', apiKey) {
-    const modelName = MODELS[type] || MODELS.flash;
-    const genAI = getGenAI(apiKey);
-    return genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: GENERATION_CONFIG
-    });
-}
-
-async function generateReadme(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash', apiKey) {
+export async function generateReadme(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash', apiKey) {
     const langInstruction = language === 'tr'
         ? 'ÖNEMLİ: HER ŞEYİ TÜRKÇE YAZ. Tüm metin, açıklamalar ve başlıklar Türkçe olmalı.'
         : 'IMPORTANT: Write EVERYTHING in English.';
@@ -119,16 +128,19 @@ async function generateReadme(repoName, fileStructure, fileContents, language = 
     `;
 
     try {
-        const model = getModel(modelType, apiKey);
-        const result = await model.generateContent(prompt);
-        return result.response.text();
+        const modelName = getModelName(modelType);
+        const text = await callGemini(apiKey, modelName, [{
+            role: 'user',
+            parts: [{ text: prompt }]
+        }], GENERATION_CONFIG);
+        return text;
     } catch (error) {
-        console.error("Gemini Error:", error);
-        throw new Error("README oluşturma başarısız: " + error.message);
+        console.error('Gemini Error:', error);
+        throw new Error('README oluşturma başarısız: ' + error.message);
     }
 }
 
-async function analyzeRepo(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash', apiKey) {
+export async function analyzeRepo(repoName, fileStructure, fileContents, language = 'en', modelType = 'flash', apiKey) {
     const prompt = `
     Sen DENEYİMLİ BİR SENİOR SOFTWARE ENGINEER, GÜVENLİK UZMANI ve ÜRÜN STRATEJİSTİSİN. Kod incelemesi yapıyorsun.
     
@@ -200,163 +212,80 @@ async function analyzeRepo(repoName, fileStructure, fileContents, language = 'en
        - Yeni özellik eklemek kolay mı?
        - Kod okunabilir mi?
     
-    4. **Operasyonel Mükemmellik:**
-       - Monitoring var mı?
-       - Error handling yeterli mi?
-       - Graceful degradation?
+    4. **Performans:**
+       - Gereksiz yoğun işlemler var mı?
+       - Potansiyel bottleneck'ler
     
-    5. **Kullanıcı Deneyimi (eğer UI varsa):**
-       - Loading states
-       - Error messages
-       - Accessibility
-    
+    5. **Rakip Analizi:**
+       - Bu projeye benzer popüler projeler neler?
+       - Bu proje rakiplerinden nerede daha iyi?
+
     ---
+
+    Dil: ${language}
+
+    Repo: ${repoName}
     
-    Proje: ${repoName}
-    
-    Dosya Yapısı:
+    Dosya Yapısı (kısmi):
     ${fileStructure.slice(0, 80).join('\n')}
     
     Ana Dosya İçerikleri:
     ${fileContents}
-    
+
     ---
     
-    ÇOK DİLLİ JSON RESPONSE (İngilizce ve Türkçe):
+    **ÇIKTI FORMATI:**
+    Aşağıdaki JSON formatında çıktı ver:
     
     {
+      "overall_health_score": 0-100,
       "summary": {
-        "en": "One powerful sentence about what this project does and quality",
-        "tr": "Projenin ne yaptığı ve kalitesi hakkında güçlü bir cümle"
+        "en": "...",
+        "tr": "..."
       },
-      
-      "core_purpose": {
-        "en": "What problem does this solve?",
-        "tr": "Bu hangi problemi çözüyor?"
-      },
-      
-      "technical_approach": {
-        "en": "How does it solve the problem? (architecture, patterns)",
-        "tr": "Sorunu nasıl çözüyor? (mimari, desenler)"
-      },
-      
       "issues": [
         {
-          "issue": {
-            "en": "Specific problem found",
-            "tr": "Bulunan spesifik sorun"
-          },
-          "category": "security" | "architecture" | "dead_code" | "testing" | "documentation" | "performance" | "maintainability",
-          "description": {
-            "en": "Why this matters and real-world impact",
-            "tr": "Bunun neden önemli olduğu ve gerçek dünya etkisi"
-          },
-          "severity": "critical" | "high" | "medium" | "low",
-          "priority_score": 1-100,
-          "code_example": "Actual problematic code snippet if applicable",
-          "fix_suggestion": {
-            "en": "How to fix this",
-            "tr": "Nasıl düzeltilir"
-          }
-        }
-      ],
-      
-      "strengths": {
-        "en": ["Concrete strength with example", "..."],
-        "tr": ["Somut güçlü yön örnek ile", "..."]
-      },
-      
-      "unique_features": {
-        "en": ["What makes this different from competitors"],
-        "tr": ["Bunu rakiplerinden farklı kılan nedir"]
-      },
-      
-      "competitors": [
-        {
-          "name": "Similar Tool Name",
-          "category": "industry_leader" | "popular_alternative" | "open_source" | "enterprise",
-          "comparison": {
-            "en": "How this project compares overall",
-            "tr": "Bu proje genel olarak nasıl karşılaştırılır"
-          },
-          "features_they_have": {
-            "en": [
-              "Feature 1 that competitor has but this project lacks",
-              "Feature 2 with explanation of why it matters"
-            ],
-            "tr": [
-              "Rakipte olan ama bu projede olmayan özellik 1",
-              "Özellik 2 ve neden önemli olduğu"
-            ]
-          },
-          "features_we_have": {
-            "en": [
-              "Unique feature in this project that competitor lacks"
-            ],
-            "tr": [
-              "Bu projede olan ama rakipte olmayan benzersiz özellik"
-            ]
-          },
-          "features_similar": {
-            "en": [
-              "Features at similar level"
-            ],
-            "tr": [
-              "Benzer seviyede olan özellikler"
-            ]
-          },
-          "learning_opportunity": {
-            "en": "What can be learned from this competitor",
-            "tr": "Bu rakipten ne öğrenilebilir"
-          }
-        }
-      ],
-      
-      "overall_health_score": 0-100,
-      
-      "score_breakdown": {
-        "security": 0-100,
-        "code_quality": 0-100,
-        "architecture": 0-100,
-        "documentation": 0-100,
-        "testing": 0-100,
-        "maintainability": 0-100
-      },
-      
-      "recommendations": [
-        {
           "title": {
-            "en": "Action item",
-            "tr": "Aksiyon kalemi"
+            "en": "...",
+            "tr": "..."
           },
           "description": {
-            "en": "Why and how",
-            "tr": "Neden ve nasıl"
+            "en": "...",
+            "tr": "..."
           },
-          "priority": "high" | "medium" | "low",
-          "category": "security" | "testing" | "documentation" | "ci_cd" | "performance" | "architecture" | "feature" | "competitive",
-          "effort": "low" | "medium" | "high",
+          "severity": "critical|high|medium|low",
+          "category": "security|performance|architecture|maintainability|other",
+          "priority_score": 0-100,
           "impact": {
-            "en": "Expected benefit",
-            "tr": "Beklenen fayda"
+            "en": "...",
+            "tr": "..."
           },
-          "inspired_by": "Competitor name (if this recommendation is inspired by a competitor feature)",
-          "example": {
-            "en": "Concrete example or code snippet",
-            "tr": "Somut örnek veya kod parçası"
+          "fix": {
+            "en": "...",
+            "tr": "..."
           }
         }
       ],
-      
-      "missing_industry_standards": {
-        "en": [
-          "Feature X is standard in this category (used by Google, Elasticsearch, etc.) but missing here"
-        ],
-        "tr": [
-          "Özellik X bu kategoride standart (Google, Elasticsearch vb. kullanıyor) ama burada yok"
-        ]
+      "strengths": {
+        "en": ["..."],
+        "tr": ["..."]
       },
-      
+      "competitors": {
+        "en": ["..."],
+        "tr": ["..."]
+      },
+      "badges": {
+        "en": ["..."],
+        "tr": ["..."]
+      },
+      "recommendations": {
+        "en": ["..."],
+        "tr": ["..."]
+      },
+      "market_position": {
+        "en": "...",
+        "tr": "..."
+      },
       "competitive_advantages": {
         "en": [
           "What makes this project stand out from competitors"
@@ -381,22 +310,23 @@ async function analyzeRepo(repoName, fileStructure, fileContents, language = 'en
     `;
 
     try {
-        const model = getModel(modelType, apiKey);
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
+        const modelName = getModelName(modelType);
+        const text = await callGemini(apiKey, modelName, [{
+            role: 'user',
+            parts: [{ text: prompt }]
+        }], GENERATION_CONFIG);
         const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
         const analysis = JSON.parse(cleanText);
 
-        // Sort issues by priority_score descending
         if (analysis.issues && Array.isArray(analysis.issues)) {
             analysis.issues.sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0));
         }
 
         return analysis;
     } catch (error) {
-        console.error("Gemini Analysis Error:", error);
+        console.error('Gemini Analysis Error:', error);
         return {
-            error: "Analiz başarısız: " + error.message,
+            error: 'Analiz başarısız: ' + error.message,
             issues: [],
             strengths: [],
             competitors: [],
@@ -405,7 +335,7 @@ async function analyzeRepo(repoName, fileStructure, fileContents, language = 'en
     }
 }
 
-async function chatWithRepo(repoName, fileStructure, fileContents, chatHistory, userMessage, language = 'en', modelType = 'flash', apiKey) {
+export async function chatWithRepo(repoName, fileStructure, fileContents, chatHistory, userMessage, language = 'en', modelType = 'flash', apiKey) {
     const langInstruction = language === 'tr'
         ? 'Türkçe cevap ver.'
         : 'Answer in English.';
@@ -441,38 +371,37 @@ async function chatWithRepo(repoName, fileStructure, fileContents, chatHistory, 
     `;
 
     try {
-        const model = getModel(modelType, apiKey);
-        const chat = model.startChat({
-            history: [
-                {
-                    role: "user",
-                    parts: [{ text: systemPrompt }],
-                },
-                {
-                    role: "model",
-                    parts: [{
-                        text: language === 'tr'
-                            ? "Anlaşıldı! Bu depo hakkında sormak istediğin her şeye yardımcı olabilirim. Ne öğrenmek istersin? 🚀"
-                            : "Got it! I can help with anything about this repo. What would you like to know? 🚀"
-                    }],
-                },
-                ...chatHistory.map(msg => ({
-                    role: msg.role === 'user' ? 'user' : 'model',
-                    parts: [{ text: msg.content }]
-                }))
-            ],
-            generationConfig: {
-                temperature: 0.8,
-                maxOutputTokens: 2000,
+        const modelName = getModelName(modelType);
+        const contents = [
+            {
+                role: 'user',
+                parts: [{ text: systemPrompt }]
             },
-        });
+            {
+                role: 'model',
+                parts: [{
+                    text: language === 'tr'
+                        ? 'Anlaşıldı! Bu depo hakkında sormak istediğin her şeye yardımcı olabilirim. Ne öğrenmek istersin? 🚀'
+                        : 'Got it! I can help with anything about this repo. What would you like to know? 🚀'
+                }]
+            },
+            ...chatHistory.map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.content }]
+            })),
+            {
+                role: 'user',
+                parts: [{ text: userMessage }]
+            }
+        ];
 
-        const result = await chat.sendMessage(userMessage);
-        return result.response.text();
+        const text = await callGemini(apiKey, modelName, contents, {
+            temperature: 0.8,
+            maxOutputTokens: 2000
+        });
+        return text;
     } catch (error) {
-        console.error("Gemini Chat Error:", error);
-        throw new Error("Chat başarısız: " + error.message);
+        console.error('Gemini Chat Error:', error);
+        throw new Error('Chat başarısız: ' + error.message);
     }
 }
-
-module.exports = { generateReadme, analyzeRepo, chatWithRepo };

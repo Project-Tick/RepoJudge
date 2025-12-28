@@ -15,3 +15,6 @@ list_models.js
 image.png
 screenshots/
 public/image.png
+docs/
+dump.rdb
+.env.example

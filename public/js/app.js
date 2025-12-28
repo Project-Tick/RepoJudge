@@ -1,9 +1,173 @@
 // State
-let selectedLang = localStorage.getItem('repojudge_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+let selectedLang = (() => {
+    try {
+        return localStorage.getItem('repojudge_lang');
+    } catch (err) {
+        return null;
+    }
+})() || (navigator.language.startsWith('tr') ? 'tr' : 'en');
 let currentAnalysis = null;
 let analysisHistory = [];
-let analysisFolders = JSON.parse(localStorage.getItem('analysisFolders')) || [];
+let analysisFolders = (() => {
+    try {
+        return JSON.parse(localStorage.getItem('analysisFolders')) || [];
+    } catch (err) {
+        return [];
+    }
+})();
 let currentFilter = 'all';
+
+const STORAGE_KEYS = {
+    geminiKey: 'repojudge_gemini_key',
+    githubClientId: 'repojudge_github_client_id',
+    githubClientSecret: 'repojudge_github_client_secret',
+    sessionSecret: 'repojudge_session_secret'
+};
+
+const memoryStore = {};
+let backendStatus = {
+    geminiConfigured: false,
+    githubOAuthConfigured: false,
+    loaded: false
+};
+
+function storageAvailable() {
+    try {
+        const testKey = '__repojudge_test__';
+        localStorage.setItem(testKey, '1');
+        localStorage.removeItem(testKey);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+const hasStorage = storageAvailable();
+
+function getStoredValue(key) {
+    if (hasStorage) return (localStorage.getItem(key) || '').trim();
+    return (memoryStore[key] || '').trim();
+}
+
+function setStoredValue(key, value) {
+    if (hasStorage) {
+        localStorage.setItem(key, value);
+    } else {
+        memoryStore[key] = value;
+    }
+}
+
+function removeStoredValue(key) {
+    if (hasStorage) {
+        localStorage.removeItem(key);
+    } else {
+        delete memoryStore[key];
+    }
+}
+
+function getApiBase() {
+    return (window.__API_BASE__ || '').trim();
+}
+
+function getGeminiKey() {
+    return getStoredValue(STORAGE_KEYS.geminiKey);
+}
+
+function getGithubClientId() {
+    return getStoredValue(STORAGE_KEYS.githubClientId);
+}
+
+function getGithubClientSecret() {
+    return getStoredValue(STORAGE_KEYS.githubClientSecret);
+}
+
+function getSessionSecret() {
+    return getStoredValue(STORAGE_KEYS.sessionSecret);
+}
+
+function buildApiUrl(path) {
+    const base = getApiBase();
+    if (!base) return path;
+    const normalized = base.replace(/\/+$/, '');
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return `${normalized}${suffix}`;
+}
+
+function buildHeaders(extra = {}) {
+    const headers = { ...extra };
+    const geminiKey = getGeminiKey();
+    const githubClientId = getGithubClientId();
+    const githubClientSecret = getGithubClientSecret();
+    const sessionSecret = getSessionSecret();
+
+    if (geminiKey) headers['x-gemini-key'] = geminiKey;
+    if (githubClientId) headers['x-github-client-id'] = githubClientId;
+    if (githubClientSecret) headers['x-github-client-secret'] = githubClientSecret;
+    if (sessionSecret) headers['x-session-secret'] = sessionSecret;
+
+    return headers;
+}
+
+function isGithubPagesHost() {
+    return window.location.hostname.endsWith('github.io');
+}
+
+async function refreshBackendStatus() {
+    try {
+        const res = await fetch(buildApiUrl('/api/status'), {
+            headers: buildHeaders(),
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('Status fetch failed');
+        const data = await res.json();
+        backendStatus = {
+            geminiConfigured: Boolean(data.geminiConfigured),
+            githubOAuthConfigured: Boolean(data.githubOAuthConfigured),
+            loaded: true
+        };
+        updateApiSettingsStatus();
+    } catch (err) {
+        backendStatus = { geminiConfigured: false, githubOAuthConfigured: false, loaded: false };
+        updateApiSettingsStatus();
+    }
+}
+
+function updateApiSettingsStatus() {
+    const geminiStatus = document.getElementById('geminiKeyStatus');
+    const githubStatus = document.getElementById('githubClientStatus');
+    if (!geminiStatus || !githubStatus) return;
+
+    if (backendStatus.loaded && backendStatus.geminiConfigured) {
+        geminiStatus.textContent = 'Gemini key optional: backend already configured.';
+        geminiStatus.classList.add('status-ok');
+    } else {
+        geminiStatus.textContent = 'Required on GitHub Pages if backend has no key.';
+        geminiStatus.classList.remove('status-ok');
+    }
+
+    if (backendStatus.loaded && backendStatus.githubOAuthConfigured) {
+        githubStatus.textContent = 'OAuth client optional: backend already configured.';
+        githubStatus.classList.add('status-ok');
+    } else {
+        githubStatus.textContent = 'Required to enable GitHub login from the frontend.';
+        githubStatus.classList.remove('status-ok');
+    }
+}
+
+function ensureBackendConfigured() {
+    return true;
+}
+
+function ensureGeminiConfigured() {
+    if (getGeminiKey()) return true;
+    if (backendStatus.geminiConfigured) return true;
+    if (isGithubPagesHost()) {
+        window.openApiSettingsModal?.();
+        alert('Please set the Gemini API key in API Settings.');
+        return false;
+    }
+    return true;
+}
 
 // Translations
 const translations = {
@@ -110,12 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize Model Selector
-    const savedModel = localStorage.getItem('repojudge_model') || 'flash';
+    const savedModel = hasStorage ? (localStorage.getItem('repojudge_model') || 'flash') : 'flash';
     const modelSelect = document.getElementById('modelSelect');
     if (modelSelect) {
         modelSelect.value = savedModel;
         modelSelect.addEventListener('change', () => {
-            localStorage.setItem('repojudge_model', modelSelect.value);
+            if (hasStorage) localStorage.setItem('repojudge_model', modelSelect.value);
         });
     }
 
@@ -126,7 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHistory();
     setupEventListeners();
     setupFolderListeners();
+    setupApiSettingsModal();
+    refreshBackendStatus();
     updateUI();
+
+    if (isGithubPagesHost() && (!getGeminiKey() || !getGithubClientId() || !getGithubClientSecret() || !getSessionSecret())) {
+        window.openApiSettingsModal?.();
+    }
 
     // Check auth last
     setTimeout(() => {
@@ -151,29 +321,34 @@ document.addEventListener('DOMContentLoaded', () => {
 // Check authentication status
 async function checkAuth() {
     console.log('[Auth] Fetching user status...');
+    const avatarImg = document.getElementById('sidebarUserAvatar');
+    const avatarPlaceholder = document.getElementById('sidebarDefaultAvatar');
+    const nameEl = document.getElementById('sidebarUserName');
+    const planEl = document.getElementById('sidebarUserPlan');
+    const settingsEmailEl = document.getElementById('settingsUserEmail');
+
+    const loginItem = document.getElementById('loginMenuItem');
+    const profileItem = document.getElementById('profileMenuItem');
+    const logoutItem = document.getElementById('logoutMenuItem');
+    const upgradeBtn = document.getElementById('upgradePlanBtn');
+    const reposSection = document.getElementById('reposSection');
+    const isGhPages = isGithubPagesHost();
+
     try {
-        const res = await fetch('/auth/user');
-        const data = await res.json();
+        const res = await fetch(buildApiUrl('/api/user'), {
+            headers: buildHeaders(),
+            credentials: 'include'
+        });
+        const data = res.ok ? await res.json() : { authenticated: false };
         console.log('[Auth] Response:', data);
-
-        const avatarImg = document.getElementById('sidebarUserAvatar');
-        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-        const nameEl = document.getElementById('sidebarUserName');
-        const planEl = document.getElementById('sidebarUserPlan');
-        const settingsEmailEl = document.getElementById('settingsUserEmail');
-
-        const loginItem = document.getElementById('loginMenuItem');
-        const profileItem = document.getElementById('profileMenuItem');
-        const logoutItem = document.getElementById('logoutMenuItem');
-        const upgradeBtn = document.getElementById('upgradePlanBtn');
-        const reposSection = document.getElementById('reposSection');
+        const hasClientConfig = Boolean(getGithubClientId() && getGithubClientSecret());
 
         if (data.authenticated && data.user) {
             console.log('[Auth] SUCCESS: Logged in as', data.user.login);
 
             // 1. Update Profile Information
             if (nameEl) nameEl.textContent = data.user.name || data.user.login || 'User';
-            if (planEl) planEl.textContent = 'Pro Plan';
+            if (planEl) planEl.textContent = hasClientConfig ? 'OAuth Ready' : 'Pro Plan';
             if (settingsEmailEl) settingsEmailEl.textContent = data.user.email || `${data.user.login}@github.com`;
 
             if (avatarImg) {
@@ -196,101 +371,124 @@ async function checkAuth() {
         } else {
             console.log('[Auth] GUEST: No active session.');
 
-            if (nameEl) nameEl.textContent = 'Guest';
-            if (planEl) planEl.textContent = 'Free Plan';
-            if (settingsEmailEl) settingsEmailEl.textContent = 'guest@repojudge.ai';
+            if (nameEl) nameEl.textContent = hasClientConfig ? 'OAuth Ready' : 'Guest';
+            if (planEl) planEl.textContent = hasClientConfig ? 'Ready to Login' : 'Free Plan';
+            if (settingsEmailEl) settingsEmailEl.textContent = hasClientConfig ? 'oauth@repojudge.yongdohyun.org.tr' : 'guest@repojudge.yongdohyun.org.tr';
 
             if (avatarImg) avatarImg.classList.add('hidden');
             if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
 
-            if (loginItem) loginItem.classList.remove('hidden');
+            if (loginItem) loginItem.classList.toggle('hidden', isGhPages && !hasClientConfig);
             if (profileItem) profileItem.classList.add('hidden');
             if (logoutItem) logoutItem.classList.add('hidden');
             if (upgradeBtn) upgradeBtn.classList.add('hidden');
 
-            if (reposSection) reposSection.classList.add('hidden');
+            if (reposSection) reposSection.classList.toggle('hidden', true);
         }
     } catch (err) {
         console.error('[Auth] Critical Error:', err);
+        const hasClientConfig = Boolean(getGithubClientId() && getGithubClientSecret());
+
+        if (nameEl) nameEl.textContent = hasClientConfig ? 'OAuth Ready' : 'Guest';
+        if (planEl) planEl.textContent = hasClientConfig ? 'Ready to Login' : 'Free Plan';
+        if (settingsEmailEl) settingsEmailEl.textContent = hasClientConfig ? 'oauth@repojudge.yongdohyun.org.tr' : 'guest@repojudge.yongdohyun.org.tr';
+
+        if (avatarImg) avatarImg.classList.add('hidden');
+        if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
+
+        if (loginItem) loginItem.classList.toggle('hidden', isGhPages && !hasClientConfig);
+        if (profileItem) profileItem.classList.add('hidden');
+        if (logoutItem) logoutItem.classList.add('hidden');
+        if (upgradeBtn) upgradeBtn.classList.add('hidden');
+
+        if (reposSection) reposSection.classList.add('hidden');
+    }
+}
+
+function renderReposList(repos) {
+    const reposList = document.getElementById('reposList');
+    if (!reposList) return;
+
+    if (!repos || repos.length === 0) {
+        reposList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No repos found</p>';
+        return;
+    }
+
+    reposList.innerHTML = repos.map((repo, i) => `
+        <div class="repo-item" data-url="https://github.com/${repo.full_name}" data-index="${i}">
+            <i class='bx ${repo.private ? 'bx-lock-alt' : 'bx-git-repo-forked'}'></i>
+            <span>${repo.name}</span>
+            ${repo.private ? '<span class="private-badge">Private</span>' : ''}
+            <i class='bx bx-dots-vertical-rounded repo-menu-trigger' data-index="${i}"></i>
+            <div class="menu-dropdown repo-menu" data-index="${i}">
+                <div class="menu-item" data-action="analyze"><i class='bx bx-analyse'></i> Analiz Et</div>
+                <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Menu trigger click
+    reposList.querySelectorAll('.repo-menu-trigger').forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const index = trigger.dataset.index;
+            const dropdown = reposList.querySelector(`.repo-menu[data-index="${index}"]`);
+
+            // Close all other dropdowns
+            document.querySelectorAll('.repo-menu.active').forEach(d => {
+                if (d !== dropdown) d.classList.remove('active');
+            });
+
+            dropdown.classList.toggle('active');
+        });
+    });
+
+    // Entire repo item click (except menu trigger)
+    reposList.querySelectorAll('.repo-item').forEach(item => {
+        item.addEventListener('click', () => {
+            repoUrlInput.value = item.dataset.url;
+            startAnalysis();
+        });
+    });
+
+    // Menu item actions
+    reposList.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = item.closest('.repo-menu');
+            const repoItem = item.closest('.repo-item');
+            const action = item.dataset.action;
+            const url = repoItem.dataset.url;
+
+            dropdown.classList.remove('active');
+
+            if (action === 'analyze') {
+                repoUrlInput.value = url;
+                startAnalysis();
+            } else if (action === 'github') {
+                window.open(url, '_blank');
+            }
+        });
+    });
+
+    // Close dropdown when clicking outside
+    if (!window.repoMenuListenerAdded) {
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.repo-menu.active').forEach(d => d.classList.remove('active'));
+        });
+        window.repoMenuListenerAdded = true;
     }
 }
 
 // Load user's GitHub repositories
 async function loadUserRepos() {
     try {
-        const res = await fetch('/auth/repos');
+        const res = await fetch(buildApiUrl('/api/repos'), {
+            headers: buildHeaders(),
+            credentials: 'include'
+        });
         const data = await res.json();
-        const reposList = document.getElementById('reposList');
-
-        if (data.repos.length === 0) {
-            reposList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No repos found</p>';
-            return;
-        }
-
-        reposList.innerHTML = data.repos.map((repo, i) => `
-            <div class="repo-item" data-url="https://github.com/${repo.full_name}" data-index="${i}">
-                <i class='bx ${repo.private ? 'bx-lock-alt' : 'bx-git-repo-forked'}'></i>
-                <span>${repo.name}</span>
-                ${repo.private ? '<span class="private-badge">Private</span>' : ''}
-                <i class='bx bx-dots-vertical-rounded repo-menu-trigger' data-index="${i}"></i>
-                <div class="menu-dropdown repo-menu" data-index="${i}">
-                    <div class="menu-item" data-action="analyze"><i class='bx bx-analyse'></i> Analiz Et</div>
-                    <div class="menu-item" data-action="github"><i class='bx bx-link-external'></i> GitHub'da Aç</div>
-                </div>
-            </div>
-        `).join('');
-
-        // Menu trigger click
-        reposList.querySelectorAll('.repo-menu-trigger').forEach(trigger => {
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevents repo-item click
-                const index = trigger.dataset.index;
-                const dropdown = reposList.querySelector(`.repo-menu[data-index="${index}"]`);
-
-                // Close all other dropdowns
-                document.querySelectorAll('.repo-menu.active').forEach(d => {
-                    if (d !== dropdown) d.classList.remove('active');
-                });
-
-                dropdown.classList.toggle('active');
-            });
-        });
-
-        // Entire repo item click (except menu trigger)
-        reposList.querySelectorAll('.repo-item').forEach(item => {
-            item.addEventListener('click', () => {
-                repoUrlInput.value = item.dataset.url;
-                startAnalysis();
-            });
-        });
-
-        // Menu item actions
-        reposList.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dropdown = item.closest('.repo-menu');
-                const repoItem = item.closest('.repo-item');
-                const action = item.dataset.action;
-                const url = repoItem.dataset.url;
-
-                dropdown.classList.remove('active');
-
-                if (action === 'analyze') {
-                    repoUrlInput.value = url;
-                    startAnalysis();
-                } else if (action === 'github') {
-                    window.open(url, '_blank');
-                }
-            });
-        });
-
-        // Close dropdown when clicking outside
-        if (!window.repoMenuListenerAdded) {
-            document.addEventListener('click', () => {
-                document.querySelectorAll('.repo-menu.active').forEach(d => d.classList.remove('active'));
-            });
-            window.repoMenuListenerAdded = true;
-        }
+        renderReposList(data.repos);
     } catch (err) {
         console.error('Failed to load repos:', err);
     }
@@ -333,14 +531,37 @@ function setupEventListeners() {
 
         langToggle.addEventListener('click', () => {
             selectedLang = selectedLang === 'en' ? 'tr' : 'en';
-            localStorage.setItem('repojudge_lang', selectedLang);
+            if (hasStorage) localStorage.setItem('repojudge_lang', selectedLang);
             updateUI();
         });
     }
 
     // Login/Logout Actions
-    document.getElementById('loginMenuItem')?.addEventListener('click', () => window.location.href = '/auth/github');
-    document.getElementById('logoutMenuItem')?.addEventListener('click', () => window.location.href = '/auth/logout');
+    document.getElementById('loginMenuItem')?.addEventListener('click', () => {
+        if (!ensureBackendConfigured()) return;
+        const clientId = getGithubClientId();
+        const clientSecret = getGithubClientSecret();
+        const sessionSecret = getSessionSecret();
+        if (!clientId || !clientSecret) {
+            window.openApiSettingsModal?.();
+            alert('Please set GitHub Client ID/Secret in API Settings.');
+            return;
+        }
+        const params = new URLSearchParams();
+        params.set('client_id', clientId);
+        params.set('client_secret', clientSecret);
+        if (sessionSecret) params.set('session_secret', sessionSecret);
+        params.set('frontend_url', window.location.href.split('#')[0]);
+        window.location.href = `${buildApiUrl('/auth/github')}?${params.toString()}`;
+    });
+    document.getElementById('logoutMenuItem')?.addEventListener('click', () => {
+        const params = new URLSearchParams();
+        const sessionSecret = getSessionSecret();
+        if (sessionSecret) params.set('session_secret', sessionSecret);
+        params.set('frontend_url', window.location.href.split('#')[0]);
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        window.location.href = `${buildApiUrl('/auth/logout')}${suffix}`;
+    });
 
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -416,6 +637,86 @@ function setupEventListeners() {
     setupScoringInfo();
 }
 
+function setupApiSettingsModal() {
+    const modal = document.getElementById('apiSettingsModal');
+    const openBtn = document.getElementById('apiSettingsItem');
+    const closeBtn = modal?.querySelector('.close-modal');
+    const geminiKeyInput = document.getElementById('geminiKeyInput');
+    const githubClientIdInput = document.getElementById('githubClientIdInput');
+    const githubClientSecretInput = document.getElementById('githubClientSecretInput');
+    const sessionSecretInput = document.getElementById('sessionSecretInput');
+    const storageNote = document.getElementById('storageNote');
+    const saveBtn = document.getElementById('saveApiSettings');
+    const clearBtn = document.getElementById('clearApiSettings');
+
+    if (!modal || !openBtn) return;
+
+    function openModal() {
+        if (geminiKeyInput) geminiKeyInput.value = getGeminiKey();
+        if (githubClientIdInput) githubClientIdInput.value = getGithubClientId();
+        if (githubClientSecretInput) githubClientSecretInput.value = getGithubClientSecret();
+        if (sessionSecretInput) sessionSecretInput.value = getSessionSecret();
+        if (storageNote) storageNote.classList.toggle('hidden', hasStorage);
+        updateApiSettingsStatus();
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    function saveSettings() {
+        const geminiKey = geminiKeyInput?.value.trim() || '';
+        const githubClientId = githubClientIdInput?.value.trim() || '';
+        const githubClientSecret = githubClientSecretInput?.value.trim() || '';
+        const sessionSecret = sessionSecretInput?.value.trim() || '';
+
+        if (geminiKey) setStoredValue(STORAGE_KEYS.geminiKey, geminiKey);
+        else removeStoredValue(STORAGE_KEYS.geminiKey);
+
+        if (githubClientId) setStoredValue(STORAGE_KEYS.githubClientId, githubClientId);
+        else removeStoredValue(STORAGE_KEYS.githubClientId);
+
+        if (githubClientSecret) setStoredValue(STORAGE_KEYS.githubClientSecret, githubClientSecret);
+        else removeStoredValue(STORAGE_KEYS.githubClientSecret);
+
+        if (sessionSecret) setStoredValue(STORAGE_KEYS.sessionSecret, sessionSecret);
+        else removeStoredValue(STORAGE_KEYS.sessionSecret);
+
+        closeModal();
+        checkAuth();
+        loadUserRepos();
+        refreshBackendStatus();
+    }
+
+    function clearSettings() {
+        removeStoredValue(STORAGE_KEYS.geminiKey);
+        removeStoredValue(STORAGE_KEYS.githubClientId);
+        removeStoredValue(STORAGE_KEYS.githubClientSecret);
+        removeStoredValue(STORAGE_KEYS.sessionSecret);
+
+        if (geminiKeyInput) geminiKeyInput.value = '';
+        if (githubClientIdInput) githubClientIdInput.value = '';
+        if (githubClientSecretInput) githubClientSecretInput.value = '';
+        if (sessionSecretInput) sessionSecretInput.value = '';
+
+        closeModal();
+        checkAuth();
+        loadUserRepos();
+        refreshBackendStatus();
+    }
+
+    openBtn.addEventListener('click', openModal);
+    saveBtn?.addEventListener('click', saveSettings);
+    clearBtn?.addEventListener('click', clearSettings);
+    closeBtn?.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    window.openApiSettingsModal = openModal;
+}
+
 // Chat Logic
 // Integrated AI Chat Logic
 function setupIntegratedChat() {
@@ -425,6 +726,15 @@ function setupIntegratedChat() {
 
         if (!currentAnalysis) {
             addChatMessage('Lütfen önce bir repository analiz edin.', 'system');
+            return;
+        }
+        if (!ensureBackendConfigured()) {
+            addChatMessage('API ayarlarını kontrol edin.', 'system');
+            return;
+        }
+        await refreshBackendStatus();
+        if (!ensureGeminiConfigured()) {
+            addChatMessage('API ayarlarını kontrol edin.', 'system');
             return;
         }
 
@@ -443,9 +753,10 @@ function setupIntegratedChat() {
         const loadingId = addChatMessage('...', 'model');
 
         try {
-            const res = await fetch('/api/chat', {
+            const res = await fetch(buildApiUrl('/api/chat'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: buildHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
                 body: JSON.stringify({
                     repoUrl: currentAnalysis.url,
                     message: text,
@@ -606,20 +917,25 @@ async function startAnalysis(options = {}) {
     const model = document.getElementById('modelSelect')?.value || 'flash';
 
     if (!url) return;
+    if (!ensureBackendConfigured()) return;
+    await refreshBackendStatus();
+    if (!ensureGeminiConfigured()) return;
 
     showLoadingScreen();
 
     try {
         // Fetch both README and analysis
         const [readmeRes, analysisRes] = await Promise.all([
-            fetch('/api/generate', {
+            fetch(buildApiUrl('/api/generate'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: buildHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
                 body: JSON.stringify({ repoUrl: url, language: selectedLang, forceRefresh, model })
             }),
-            fetch('/api/analyze', {
+            fetch(buildApiUrl('/api/analyze'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: buildHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
                 body: JSON.stringify({ repoUrl: url, language: selectedLang, forceRefresh, model })
             })
         ]);
@@ -910,7 +1226,7 @@ function saveToHistory(analysis) {
     analysisHistory.unshift(analysis);
     // Limit to 10
     analysisHistory = analysisHistory.slice(0, 10);
-    localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+    if (hasStorage) localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
     renderHistory();
 }
 
@@ -947,7 +1263,7 @@ function setupFolderListeners() {
 }
 
 function saveFolders() {
-    localStorage.setItem('analysisFolders', JSON.stringify(analysisFolders));
+    if (hasStorage) localStorage.setItem('analysisFolders', JSON.stringify(analysisFolders));
 }
 
 function renderHistory() {
@@ -1091,6 +1407,5 @@ function setupHistoryItemListeners() {
 }
 
 function saveHistory() {
-    localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+    if (hasStorage) localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
 }
-

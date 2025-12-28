@@ -57,7 +57,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="/" class="logo">
+                <a href="index.html" class="logo">
                     <i class='bx bx-code-block'></i>
                     <span>RepoJudge</span>
                 </a>
@@ -67,27 +67,29 @@
                 <i class='bx bx-plus'></i> <span data-i18n="newAnalysis">New Analysis</span>
             </button>
 
-            <!-- Navigation / Scrollable Area -->
-            <div class="sidebar-nav">
-                <!-- History Items -->
-                <div id="historySection" class="history-section">
-                    <div class="section-header">
-                        <h4 data-i18n="history">Analysis History</h4>
-                        <button id="newFolderBtn" class="icon-btn-small" title="New Folder">
-                            <i class='bx bx-folder-plus'></i>
-                        </button>
-                    </div>
-                    <div id="historyList" class="history-list">
-                        <!-- populated by JS -->
+            <div class="sidebar-scroll">
+                <!-- Navigation / Scrollable Area -->
+                <div class="sidebar-nav">
+                    <!-- History Items -->
+                    <div id="historySection" class="history-section">
+                        <div class="section-header">
+                            <h4 data-i18n="history">Analysis History</h4>
+                            <button id="newFolderBtn" class="icon-btn-small" title="New Folder">
+                                <i class='bx bx-folder-plus'></i>
+                            </button>
+                        </div>
+                        <div id="historyList" class="history-list">
+                            <!-- populated by JS -->
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- User Repos (Pinned to Bottom) -->
-            <div id="reposSection" class="repos-section hidden">
-                <h4 data-i18n="yourRepos">Your Repos</h4>
-                <div id="reposList" class="repos-list">
-                    <!-- populated by JS -->
+                <!-- User Repos (Pinned to Bottom) -->
+                <div id="reposSection" class="repos-section hidden">
+                    <h4 data-i18n="yourRepos">Your Repos</h4>
+                    <div id="reposList" class="repos-list">
+                        <!-- populated by JS -->
+                    </div>
                 </div>
             </div>
 
@@ -96,7 +98,7 @@
                 <!-- Settings Popover -->
                 <div id="settingsMenu" class="settings-menu">
                     <div class="settings-profile-header">
-                        <span id="settingsUserEmail" class="user-email">guest@repojudge.ai</span>
+                        <span id="settingsUserEmail" class="user-email">guest@repojudge.yongdohyun.org.tr</span>
                     </div>
                     <div class="menu-divider"></div>
                     <div class="menu-item" id="upgradePlanBtn">
@@ -109,6 +111,9 @@
                     <div class="menu-item" id="langToggleItem">
                         <i class='bx bx-globe'></i> <span>Language:</span> <span id="currentLangDisplay"
                             class="lang-val">EN</span>
+                    </div>
+                    <div class="menu-item" id="apiSettingsItem">
+                        <i class='bx bx-key'></i> <span>API Settings</span>
                     </div>
                     <div class="menu-divider"></div>
                     <div class="menu-item danger" id="logoutMenuItem">
@@ -389,8 +394,54 @@
         </div>
     </div>
 
+    <!-- API Settings Modal -->
+    <div id="apiSettingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Settings</h3>
+                <button class="close-modal"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Set your API keys for this device. Values are stored in localStorage on this device.</p>
+                <div class="settings-form">
+                    <label class="settings-label" for="geminiKeyInput">Gemini API Key (GEMINI_API_KEY)</label>
+                    <input id="geminiKeyInput" class="settings-input" type="password" autocomplete="off"
+                        placeholder="AIzaSyxxxxxxxxxxxxxxxxxxxx">
+                    <span class="settings-help">Optional if the backend already has GEMINI_API_KEY configured.</span>
+                    <span id="geminiKeyStatus" class="settings-help"></span>
+
+                    <label class="settings-label" for="githubClientIdInput">GitHub Client ID (GITHUB_CLIENT_ID)</label>
+                    <input id="githubClientIdInput" class="settings-input" type="text" autocomplete="off"
+                        placeholder="Ov23lxxxxxxxxxxxxxx">
+                    <span class="settings-help">OAuth App Client ID for login and private repo access.</span>
+
+                    <label class="settings-label" for="githubClientSecretInput">GitHub Client Secret (GITHUB_CLIENT_SECRET)</label>
+                    <input id="githubClientSecretInput" class="settings-input" type="password" autocomplete="off"
+                        placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                    <span class="settings-help">Used by the backend during OAuth token exchange.</span>
+                    <span id="githubClientStatus" class="settings-help"></span>
+
+                    <label class="settings-label" for="sessionSecretInput">Session Secret (SESSION_SECRET)</label>
+                    <input id="sessionSecretInput" class="settings-input" type="password" autocomplete="off"
+                        placeholder="your_random_session_secret">
+                    <span class="settings-help">Used for session signing on the backend.</span>
+
+                    <span id="storageNote" class="settings-help hidden">Local storage is disabled; settings will only persist for this session.</span>
+                </div>
+                <div class="settings-actions">
+                    <button class="settings-btn ghost" id="clearApiSettings">Clear</button>
+                    <button class="settings-btn primary" id="saveApiSettings">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="js/app.js?v=26"></script>
+    <script>
+        // Optional: set the Cloudflare Worker origin if backend is on a different host.
+        // window.__API_BASE__ = 'https://your-worker.yourdomain.workers.dev';
+    </script>
+    <script src="js/app.js?v=27"></script>
 </body>
 
 </html>
