@@ -969,6 +969,18 @@ function getText(data) {
     return data[selectedLang] || data['en'] || '';
 }
 
+function getList(data) {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'string') return [data];
+    if (typeof data === 'object') {
+        const localized = data[selectedLang] || data['en'] || data['tr'];
+        if (Array.isArray(localized)) return localized;
+        if (typeof localized === 'string') return [localized];
+    }
+    return [];
+}
+
 // Render Analysis
 function renderAnalysis() {
     const { repoName, readme, analysis } = currentAnalysis;
@@ -1003,15 +1015,13 @@ function renderAnalysis() {
     renderIssues();
 
     // Strengths (Localized)
-    const strengths = Array.isArray(analysis.strengths)
-        ? analysis.strengths
-        : (analysis.strengths?.[selectedLang] || analysis.strengths?.['en'] || []);
+    const strengths = getList(analysis.strengths);
 
     document.getElementById('strengthsList').innerHTML = strengths
         .map(s => `<li>${s}</li>`).join('');
 
     // Competitors
-    const competitors = analysis.competitors || [];
+    const competitors = getList(analysis.competitors);
     document.getElementById('competitorsList').innerHTML = competitors
         .map(c => {
             const name = typeof c === 'string' ? c : c.name;
@@ -1031,7 +1041,7 @@ function renderAnalysis() {
         : `<p style="color: var(--text-muted)">${translations[selectedLang].noIssues}</p>`;
 
     // Recommendations
-    const recommendations = analysis.recommendations || [];
+    const recommendations = getList(analysis.recommendations);
     document.getElementById('recommendationsList').innerHTML = recommendations.length
         ? recommendations.map(renderRecommendationCard).join('')
         : `<p style="color: var(--text-muted)">Harika! Şu an için önerimiz yok.</p>`;
