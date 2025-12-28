@@ -94,7 +94,7 @@ RepoJudge can run on GitHub Pages as a static frontend that talks to a separatel
    - GitHub token
    - Gemini API key
 
-Tokens are stored in localStorage on the client device.
+On first visit the site prompts for these values. If localStorage is available, they are stored on the client device.
 
 ## 🔧 GitHub OAuth Setup
 
@@ -137,4 +137,4 @@ MIT License - feel free to use this project however you want!
 
 ---
 
-**Made with ❤️ by [grxtor](https://github.com/grxtor)**
+**Made with ❤️ by [grxtor](https://github.com/grxtor) [YongDo-Hyun](https://github.com/YongDo-Hyun)**

@@ -1,8 +1,20 @@
 // State
-let selectedLang = localStorage.getItem('repojudge_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+let selectedLang = (() => {
+    try {
+        return localStorage.getItem('repojudge_lang');
+    } catch (err) {
+        return null;
+    }
+})() || (navigator.language.startsWith('tr') ? 'tr' : 'en');
 let currentAnalysis = null;
 let analysisHistory = [];
-let analysisFolders = JSON.parse(localStorage.getItem('analysisFolders')) || [];
+let analysisFolders = (() => {
+    try {
+        return JSON.parse(localStorage.getItem('analysisFolders')) || [];
+    } catch (err) {
+        return [];
+    }
+})();
 let currentFilter = 'all';
 
 const STORAGE_KEYS = {
@@ -11,8 +23,40 @@ const STORAGE_KEYS = {
     geminiKey: 'repojudge_gemini_key'
 };
 
+const memoryStore = {};
+
+function storageAvailable() {
+    try {
+        const testKey = '__repojudge_test__';
+        localStorage.setItem(testKey, '1');
+        localStorage.removeItem(testKey);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+const hasStorage = storageAvailable();
+
 function getStoredValue(key) {
-    return (localStorage.getItem(key) || '').trim();
+    if (hasStorage) return (localStorage.getItem(key) || '').trim();
+    return (memoryStore[key] || '').trim();
+}
+
+function setStoredValue(key, value) {
+    if (hasStorage) {
+        localStorage.setItem(key, value);
+    } else {
+        memoryStore[key] = value;
+    }
+}
+
+function removeStoredValue(key) {
+    if (hasStorage) {
+        localStorage.removeItem(key);
+    } else {
+        delete memoryStore[key];
+    }
 }
 
 function getApiBase() {
@@ -53,7 +97,18 @@ function isGithubPagesHost() {
 function ensureBackendConfigured() {
     if (getApiBase()) return true;
     if (isGithubPagesHost()) {
+        window.openApiSettingsModal?.();
         alert('Please set the Backend URL in API Settings.');
+        return false;
+    }
+    return true;
+}
+
+function ensureGeminiConfigured() {
+    if (getGeminiKey()) return true;
+    if (isGithubPagesHost()) {
+        window.openApiSettingsModal?.();
+        alert('Please set the Gemini API key in API Settings.');
         return false;
     }
     return true;
@@ -169,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modelSelect) {
         modelSelect.value = savedModel;
         modelSelect.addEventListener('change', () => {
-            localStorage.setItem('repojudge_model', modelSelect.value);
+            if (hasStorage) localStorage.setItem('repojudge_model', modelSelect.value);
         });
     }
 
@@ -182,6 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFolderListeners();
     setupApiSettingsModal();
     updateUI();
+
+    if (isGithubPagesHost() && (!getApiBase() || !getGeminiKey() || !getGithubToken())) {
+        window.openApiSettingsModal?.();
+    }
 
     // Check auth last
     setTimeout(() => {
@@ -410,7 +469,7 @@ function setupEventListeners() {
 
         langToggle.addEventListener('click', () => {
             selectedLang = selectedLang === 'en' ? 'tr' : 'en';
-            localStorage.setItem('repojudge_lang', selectedLang);
+            if (hasStorage) localStorage.setItem('repojudge_lang', selectedLang);
             updateUI();
         });
     }
@@ -504,6 +563,7 @@ function setupApiSettingsModal() {
     const apiBaseInput = document.getElementById('apiBaseInput');
     const githubTokenInput = document.getElementById('githubTokenInput');
     const geminiKeyInput = document.getElementById('geminiKeyInput');
+    const storageNote = document.getElementById('storageNote');
     const saveBtn = document.getElementById('saveApiSettings');
     const clearBtn = document.getElementById('clearApiSettings');
 
@@ -513,6 +573,7 @@ function setupApiSettingsModal() {
         if (apiBaseInput) apiBaseInput.value = getApiBase();
         if (githubTokenInput) githubTokenInput.value = getGithubToken();
         if (geminiKeyInput) geminiKeyInput.value = getGeminiKey();
+        if (storageNote) storageNote.classList.toggle('hidden', hasStorage);
         modal.classList.remove('hidden');
     }
 
@@ -525,14 +586,14 @@ function setupApiSettingsModal() {
         const githubToken = githubTokenInput?.value.trim() || '';
         const geminiKey = geminiKeyInput?.value.trim() || '';
 
-        if (apiBase) localStorage.setItem(STORAGE_KEYS.apiBase, apiBase);
-        else localStorage.removeItem(STORAGE_KEYS.apiBase);
+        if (apiBase) setStoredValue(STORAGE_KEYS.apiBase, apiBase);
+        else removeStoredValue(STORAGE_KEYS.apiBase);
 
-        if (githubToken) localStorage.setItem(STORAGE_KEYS.githubToken, githubToken);
-        else localStorage.removeItem(STORAGE_KEYS.githubToken);
+        if (githubToken) setStoredValue(STORAGE_KEYS.githubToken, githubToken);
+        else removeStoredValue(STORAGE_KEYS.githubToken);
 
-        if (geminiKey) localStorage.setItem(STORAGE_KEYS.geminiKey, geminiKey);
-        else localStorage.removeItem(STORAGE_KEYS.geminiKey);
+        if (geminiKey) setStoredValue(STORAGE_KEYS.geminiKey, geminiKey);
+        else removeStoredValue(STORAGE_KEYS.geminiKey);
 
         closeModal();
         checkAuth();
@@ -540,9 +601,9 @@ function setupApiSettingsModal() {
     }
 
     function clearSettings() {
-        localStorage.removeItem(STORAGE_KEYS.apiBase);
-        localStorage.removeItem(STORAGE_KEYS.githubToken);
-        localStorage.removeItem(STORAGE_KEYS.geminiKey);
+        removeStoredValue(STORAGE_KEYS.apiBase);
+        removeStoredValue(STORAGE_KEYS.githubToken);
+        removeStoredValue(STORAGE_KEYS.geminiKey);
 
         if (apiBaseInput) apiBaseInput.value = '';
         if (githubTokenInput) githubTokenInput.value = '';
@@ -560,6 +621,8 @@ function setupApiSettingsModal() {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
+
+    window.openApiSettingsModal = openModal;
 }
 
 // Chat Logic
@@ -573,8 +636,8 @@ function setupIntegratedChat() {
             addChatMessage('Lütfen önce bir repository analiz edin.', 'system');
             return;
         }
-        if (!ensureBackendConfigured()) {
-            addChatMessage('API ayarlarından Backend URL belirleyin.', 'system');
+        if (!ensureBackendConfigured() || !ensureGeminiConfigured()) {
+            addChatMessage('API ayarlarını kontrol edin.', 'system');
             return;
         }
 
@@ -756,7 +819,7 @@ async function startAnalysis(options = {}) {
     const model = document.getElementById('modelSelect')?.value || 'flash';
 
     if (!url) return;
-    if (!ensureBackendConfigured()) return;
+    if (!ensureBackendConfigured() || !ensureGeminiConfigured()) return;
 
     showLoadingScreen();
 
@@ -1061,7 +1124,7 @@ function saveToHistory(analysis) {
     analysisHistory.unshift(analysis);
     // Limit to 10
     analysisHistory = analysisHistory.slice(0, 10);
-    localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+    if (hasStorage) localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
     renderHistory();
 }
 
@@ -1098,7 +1161,7 @@ function setupFolderListeners() {
 }
 
 function saveFolders() {
-    localStorage.setItem('analysisFolders', JSON.stringify(analysisFolders));
+    if (hasStorage) localStorage.setItem('analysisFolders', JSON.stringify(analysisFolders));
 }
 
 function renderHistory() {
@@ -1242,5 +1305,5 @@ function setupHistoryItemListeners() {
 }
 
 function saveHistory() {
-    localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+    if (hasStorage) localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
 }
