@@ -111,9 +111,9 @@ function parseGitHubUrl(repoUrl) {
     return { owner, repo };
 }
 
-function getSessionSecret(request) {
+function getSessionSecret(request, env) {
     const url = new URL(request.url);
-    return request.headers.get('x-session-secret') || url.searchParams.get('session_secret') || '';
+    return request.headers.get('x-session-secret') || url.searchParams.get('session_secret') || env?.SESSION_SECRET || '';
 }
 
 function getFrontendUrl(request) {
@@ -140,7 +140,7 @@ async function getSession(request, env) {
     const cookieValue = cookies[SESSION_COOKIE];
     if (!cookieValue) return { sessionId: null, session: null };
 
-    const sessionSecret = getSessionSecret(request);
+    const sessionSecret = getSessionSecret(request, env);
     let sessionId = cookieValue;
 
     if (cookieValue.includes('.')) {
@@ -183,11 +183,15 @@ async function setCache(env, key, value, ttlSeconds = CACHE_TTL) {
     });
 }
 
-function resolveGithubConfig(request) {
+function resolveGithubConfig(request, env) {
     const url = new URL(request.url);
-    const clientId = url.searchParams.get('client_id') || request.headers.get('x-github-client-id');
-    const clientSecret = url.searchParams.get('client_secret') || request.headers.get('x-github-client-secret');
-    const sessionSecret = getSessionSecret(request);
+    const clientId = url.searchParams.get('client_id')
+        || request.headers.get('x-github-client-id')
+        || env?.GITHUB_CLIENT_ID;
+    const clientSecret = url.searchParams.get('client_secret')
+        || request.headers.get('x-github-client-secret')
+        || env?.GITHUB_CLIENT_SECRET;
+    const sessionSecret = getSessionSecret(request, env);
     const frontendUrl = getFrontendUrl(request);
 
     const baseCallbackUrl = `${url.origin}/auth/github/callback`;
@@ -219,7 +223,7 @@ async function handleAuth(request, env) {
 
     if (url.pathname === '/auth/github') {
         const scope = 'read:user user:email repo';
-        const { clientId, callbackUrl, frontendUrl } = resolveGithubConfig(request);
+        const { clientId, callbackUrl, frontendUrl } = resolveGithubConfig(request, env);
 
         if (!clientId) {
             const fallback = frontendUrl || '/dashboard.html';
@@ -242,7 +246,7 @@ async function handleAuth(request, env) {
 
     if (url.pathname === '/auth/github/callback') {
         const code = url.searchParams.get('code');
-        const { clientId, clientSecret, sessionSecret, frontendUrl } = resolveGithubConfig(request);
+        const { clientId, clientSecret, sessionSecret, frontendUrl } = resolveGithubConfig(request, env);
         const fallback = frontendUrl || '/dashboard.html';
 
         if (!code) {
@@ -363,14 +367,16 @@ async function handleApi(request, env) {
     const url = new URL(request.url);
     const { session } = await getSession(request, env);
     const authToken = session?.user?.accessToken || null;
-    const geminiKey = request.headers.get('x-gemini-key') || '';
+    const geminiKey = request.headers.get('x-gemini-key') || env?.GEMINI_API_KEY || '';
 
     if (url.pathname === '/api/status') {
         const headerClientId = request.headers.get('x-github-client-id');
         const headerClientSecret = request.headers.get('x-github-client-secret');
+        const envClientId = env?.GITHUB_CLIENT_ID;
+        const envClientSecret = env?.GITHUB_CLIENT_SECRET;
         return jsonResponse({
             geminiConfigured: Boolean(geminiKey),
-            githubOAuthConfigured: Boolean(headerClientId && headerClientSecret)
+            githubOAuthConfigured: Boolean((headerClientId && headerClientSecret) || (envClientId && envClientSecret))
         });
     }
 
