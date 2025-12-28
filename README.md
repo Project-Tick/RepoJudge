@@ -82,7 +82,7 @@ These values are collected in the **API Settings** modal on first visit and sent
 
 RepoJudge can run on GitHub Pages as a static frontend that talks to a separately hosted backend.
 
-1. Deploy the Node/Redis backend (same codebase).
+1. Deploy the Node backend (same codebase).
 2. Build the static frontend:
    ```bash
    npm run build
