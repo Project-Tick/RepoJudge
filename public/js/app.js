@@ -24,6 +24,11 @@ const STORAGE_KEYS = {
 };
 
 const memoryStore = {};
+let backendStatus = {
+    geminiConfigured: false,
+    githubOAuthConfigured: false,
+    loaded: false
+};
 
 function storageAvailable() {
     try {
@@ -94,6 +99,39 @@ function isGithubPagesHost() {
     return window.location.hostname.endsWith('github.io');
 }
 
+async function refreshBackendStatus() {
+    const base = getApiBase();
+    if (!base && isGithubPagesHost()) return;
+
+    try {
+        const res = await fetch(buildApiUrl('/api/status'), { headers: buildHeaders() });
+        if (!res.ok) throw new Error('Status fetch failed');
+        const data = await res.json();
+        backendStatus = {
+            geminiConfigured: Boolean(data.geminiConfigured),
+            githubOAuthConfigured: Boolean(data.githubOAuthConfigured),
+            loaded: true
+        };
+        updateApiSettingsStatus();
+    } catch (err) {
+        backendStatus = { geminiConfigured: false, githubOAuthConfigured: false, loaded: false };
+        updateApiSettingsStatus();
+    }
+}
+
+function updateApiSettingsStatus() {
+    const geminiStatus = document.getElementById('geminiKeyStatus');
+    if (!geminiStatus) return;
+
+    if (backendStatus.loaded && backendStatus.geminiConfigured) {
+        geminiStatus.textContent = 'Gemini key optional: backend already configured.';
+        geminiStatus.classList.add('status-ok');
+    } else {
+        geminiStatus.textContent = 'Required on GitHub Pages if backend has no key.';
+        geminiStatus.classList.remove('status-ok');
+    }
+}
+
 function ensureBackendConfigured() {
     if (getApiBase()) return true;
     if (isGithubPagesHost()) {
@@ -106,6 +144,7 @@ function ensureBackendConfigured() {
 
 function ensureGeminiConfigured() {
     if (getGeminiKey()) return true;
+    if (backendStatus.geminiConfigured) return true;
     if (isGithubPagesHost()) {
         window.openApiSettingsModal?.();
         alert('Please set the Gemini API key in API Settings.');
@@ -236,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupFolderListeners();
     setupApiSettingsModal();
+    refreshBackendStatus();
     updateUI();
 
     if (isGithubPagesHost() && (!getApiBase() || !getGeminiKey() || !getGithubToken())) {
@@ -574,6 +614,7 @@ function setupApiSettingsModal() {
         if (githubTokenInput) githubTokenInput.value = getGithubToken();
         if (geminiKeyInput) geminiKeyInput.value = getGeminiKey();
         if (storageNote) storageNote.classList.toggle('hidden', hasStorage);
+        updateApiSettingsStatus();
         modal.classList.remove('hidden');
     }
 
@@ -598,6 +639,7 @@ function setupApiSettingsModal() {
         closeModal();
         checkAuth();
         loadUserRepos();
+        refreshBackendStatus();
     }
 
     function clearSettings() {
@@ -612,6 +654,7 @@ function setupApiSettingsModal() {
         closeModal();
         checkAuth();
         loadUserRepos();
+        refreshBackendStatus();
     }
 
     openBtn.addEventListener('click', openModal);
@@ -636,7 +679,12 @@ function setupIntegratedChat() {
             addChatMessage('Lütfen önce bir repository analiz edin.', 'system');
             return;
         }
-        if (!ensureBackendConfigured() || !ensureGeminiConfigured()) {
+        if (!ensureBackendConfigured()) {
+            addChatMessage('API ayarlarını kontrol edin.', 'system');
+            return;
+        }
+        await refreshBackendStatus();
+        if (!ensureGeminiConfigured()) {
             addChatMessage('API ayarlarını kontrol edin.', 'system');
             return;
         }
@@ -819,7 +867,9 @@ async function startAnalysis(options = {}) {
     const model = document.getElementById('modelSelect')?.value || 'flash';
 
     if (!url) return;
-    if (!ensureBackendConfigured() || !ensureGeminiConfigured()) return;
+    if (!ensureBackendConfigured()) return;
+    await refreshBackendStatus();
+    if (!ensureGeminiConfigured()) return;
 
     showLoadingScreen();
 

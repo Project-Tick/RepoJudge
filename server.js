@@ -229,6 +229,13 @@ app.get('/api/repos', async (req, res) => {
     }
 });
 
+app.get('/api/status', (req, res) => {
+    res.json({
+        geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
+        githubOAuthConfigured: Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET)
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

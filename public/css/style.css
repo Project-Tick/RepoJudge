@@ -461,12 +461,21 @@ body {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* Sidebar Navigation Area */
-.sidebar-nav {
+/* Sidebar Scroll Area */
+.sidebar-scroll {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+}
+
+/* Sidebar Navigation Area */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .repos-section {
@@ -1643,6 +1652,10 @@ body {
     font-size: 0.75rem;
     color: var(--text-muted);
     margin-bottom: 6px;
+}
+
+.settings-help.status-ok {
+    color: var(--success);
 }
 
 .settings-actions {
