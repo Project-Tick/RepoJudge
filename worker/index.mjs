@@ -268,7 +268,8 @@ async function handleAuth(request, env) {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'RepoJudge Worker'
                 },
                 body: JSON.stringify({
                     client_id: clientId,
@@ -277,7 +278,14 @@ async function handleAuth(request, env) {
                 })
             });
 
-            const tokenData = await tokenRes.json();
+            const tokenText = await tokenRes.text();
+            let tokenData = null;
+            try {
+                tokenData = JSON.parse(tokenText);
+            } catch (err) {
+                console.error('OAuth Token Parse Error:', tokenRes.status, tokenText.slice(0, 200));
+                tokenData = null;
+            }
             const accessToken = tokenData?.access_token;
 
             if (!accessToken) {
@@ -292,7 +300,8 @@ async function handleAuth(request, env) {
             const userRes = await fetch('https://api.github.com/user', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
-                    Accept: 'application/vnd.github.v3+json'
+                    Accept: 'application/vnd.github.v3+json',
+                    'User-Agent': 'RepoJudge Worker'
                 }
             });
 
@@ -390,7 +399,8 @@ async function handleApi(request, env) {
             const res = await fetch('https://api.github.com/user/repos?sort=updated&per_page=20&affiliation=owner', {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
-                    Accept: 'application/vnd.github.v3+json'
+                    Accept: 'application/vnd.github.v3+json',
+                    'User-Agent': 'RepoJudge Worker'
                 }
             });
             const data = await res.json();

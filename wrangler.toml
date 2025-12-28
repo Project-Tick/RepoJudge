@@ -6,3 +6,14 @@ kv_namespaces = [
   { binding = "repojudge_sessions", id = "ab2d2ccf4b4e4bcc84c60eac01556357" },
   { binding = "repojudge_cache", id = "5fb813c713494da2b667f7e363c6fbac" }
 ]
+
+[observability]
+[observability.logs]
+enabled = false
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+[observability.traces]
+enabled = false
+head_sampling_rate = 1
+persist = true
